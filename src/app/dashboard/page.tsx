@@ -61,12 +61,21 @@ export default function Dashboard() {
           <p className="text-gray-600 mb-6">
             Logged in as: {user.email}
           </p>
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-          >
-            Sign Out
-          </button>
+          
+          <div className="space-y-3 mb-6">
+            <a
+              href="/dashboard/profile"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors block text-center"
+            >
+              Edit Profile
+            </a>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
     </div>
