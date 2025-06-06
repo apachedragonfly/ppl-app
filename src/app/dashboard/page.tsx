@@ -69,10 +69,16 @@ export default function Dashboard() {
             </div>
             <div className="flex space-x-3 mt-4 sm:mt-0">
               <a
-                href="/dashboard/workouts"
+                href="/workouts/new"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
               >
                 Log Workout
+              </a>
+              <a
+                href="/routines"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              >
+                Routines
               </a>
               <a
                 href="/dashboard/profile"

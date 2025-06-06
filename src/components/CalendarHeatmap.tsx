@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import CalendarHeatmap from 'react-calendar-heatmap'
 import { supabase } from '@/lib/supabase'
 import { Workout } from '@/types'
@@ -27,6 +27,7 @@ interface CalendarHeatmapProps {
 }
 
 export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatmapProps) {
+  const heatmapRef = useRef<HTMLDivElement>(null)
   const [heatmapData, setHeatmapData] = useState<HeatmapValue[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -220,19 +221,22 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         </div>
       </div>
 
-      <div className="workout-heatmap">
-        <CalendarHeatmap
-          startDate={startDate}
-          endDate={endDate}
-          values={heatmapData}
-          classForValue={classForValue}
-          onClick={(value) => {
-            if (value && value.date && value.count > 0) {
-              fetchWorkoutDetails(value.date)
-            }
-          }}
-          showWeekdayLabels={true}
-        />
+      <div className="workout-heatmap" style={{ height: '200px', overflow: 'hidden' }}>
+        <div ref={heatmapRef} style={{ height: '100%' }}>
+          <CalendarHeatmap
+            startDate={startDate}
+            endDate={endDate}
+            values={heatmapData}
+            classForValue={classForValue}
+            onClick={(value) => {
+              if (value && value.date && value.count > 0) {
+                fetchWorkoutDetails(value.date)
+              }
+            }}
+            showWeekdayLabels={false}
+            showMonthLabels={true}
+          />
+        </div>
       </div>
       <div className="flex items-center justify-between mt-3 text-sm text-gray-600">
         <span>Less</span>
@@ -306,6 +310,20 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
       <style jsx global>{`
         .workout-heatmap .react-calendar-heatmap {
           width: 100%;
+          height: 200px;
+          max-height: 200px;
+        }
+
+        .workout-heatmap .react-calendar-heatmap svg {
+          width: 100%;
+          height: 200px;
+          max-height: 200px;
+        }
+
+        .workout-heatmap .react-calendar-heatmap rect {
+          max-width: 15px;
+          max-height: 15px;
+          rx: 2;
         }
         
         .workout-heatmap .react-calendar-heatmap .color-empty {

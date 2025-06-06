@@ -27,7 +27,32 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
   useEffect(() => {
     loadExercises()
+    loadRoutineFromStorage()
   }, [])
+
+  const loadRoutineFromStorage = () => {
+    try {
+      const storedRoutine = localStorage.getItem('selectedRoutine')
+      if (storedRoutine) {
+        const routine = JSON.parse(storedRoutine)
+        setWorkoutType(routine.type)
+        
+        // Convert routine exercises to workout logs
+        const logs: WorkoutLog[] = routine.routine_exercises.map((re: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+          exercise_id: re.exercise_id,
+          exercise_name: re.exercise?.name || '',
+          sets: re.sets,
+          reps: re.reps,
+          weight_kg: re.weight_kg || 0
+        }))
+        
+        setWorkoutLogs(logs)
+        localStorage.removeItem('selectedRoutine') // Clear after loading
+      }
+    } catch (error) {
+      console.error('Error loading routine from storage:', error)
+    }
+  }
 
   const loadExercises = async () => {
     try {
