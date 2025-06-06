@@ -123,17 +123,6 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
     )
   }
 
-  if (!progressData.length) {
-    return (
-      <div className={`p-4 ${className}`}>
-        <h3 className="text-lg font-semibold mb-4 text-gray-900">Progress Chart</h3>
-        <div className="text-center py-8 text-gray-500">
-          No workout data available. Start logging workouts to see your progress!
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={`p-4 ${className}`}>
       <div className="flex flex-col space-y-4 mb-6">
@@ -144,12 +133,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
             value={selectedExercise}
             onChange={(e) => setSelectedExercise(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={exercises.length === 0}
           >
-            {exercises.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
+            {exercises.length === 0 ? (
+              <option value="">No exercises available</option>
+            ) : (
+              exercises.map((exercise) => (
+                <option key={exercise.id} value={exercise.id}>
+                  {exercise.name}
+                </option>
+              ))
+            )}
           </select>
 
           <div className="flex space-x-2">
@@ -160,6 +154,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
+              disabled={!progressData.length}
             >
               Weight
             </button>
@@ -170,6 +165,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
+              disabled={!progressData.length}
             >
               1RM
             </button>
@@ -177,7 +173,16 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         </div>
       </div>
 
-      <div className="h-64">
+      {!progressData.length ? (
+        <div className="text-center py-8 text-gray-500">
+          {exercises.length === 0 
+            ? "No exercises available. Start logging workouts to see your progress!"
+            : "No workout data for this exercise. Start logging workouts to see your progress!"
+          }
+        </div>
+      ) : (
+        <>
+          <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'weight' ? (
             <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -237,15 +242,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-4 text-sm text-gray-600">
-        <p>
-          <strong>{selectedExerciseName}</strong> - {
-            chartType === 'weight' 
-              ? 'Highest weight lifted per workout session'
-              : 'Estimated 1 Rep Max using formula: Weight × (1 + 0.0333 × Reps)'
-          }
-        </p>
-      </div>
+          <div className="mt-4 text-sm text-gray-600">
+            <p>
+              <strong>{selectedExerciseName}</strong> - {
+                chartType === 'weight' 
+                  ? 'Highest weight lifted per workout session'
+                  : 'Estimated 1 Rep Max using formula: Weight × (1 + 0.0333 × Reps)'
+              }
+            </p>
+          </div>
+        </>
+      )}
     </div>
   )
 } 
