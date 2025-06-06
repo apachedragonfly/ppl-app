@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Trash } from 'lucide-react'
 import { Workout, WorkoutLog } from '@/types'
 
 interface WorkoutCardProps {
@@ -77,17 +79,19 @@ export default function WorkoutCard({ workout, onDeleted }: WorkoutCardProps) {
             {formatDate(workout.date)}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <div className="text-sm text-gray-500">
             {getTotalVolume().toFixed(0)} kg total
           </div>
-          <button
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={() => setShowConfirm(true)}
-            className="text-red-600 hover:text-red-700 text-sm font-medium"
             disabled={deleting}
           >
-            🗑️
-          </button>
+            <Trash className="-ms-1 me-2 opacity-60" size={16} strokeWidth={2} aria-hidden="true" />
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -115,20 +119,22 @@ export default function WorkoutCard({ workout, onDeleted }: WorkoutCardProps) {
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-700">Delete this workout?</span>
             <div className="flex space-x-2">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowConfirm(false)}
-                className="text-sm text-gray-600 hover:text-gray-700"
                 disabled={deleting}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={handleDelete}
-                className="text-sm text-red-600 hover:text-red-700 font-medium"
                 disabled={deleting}
               >
                 {deleting ? 'Deleting...' : 'Delete'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
