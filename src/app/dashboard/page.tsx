@@ -64,8 +64,14 @@ export default function Dashboard() {
           
           <div className="space-y-3 mb-6">
             <a
-              href="/dashboard/profile"
+              href="/dashboard/workouts"
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors block text-center"
+            >
+              Log Workout
+            </a>
+            <a
+              href="/dashboard/profile"
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors block text-center"
             >
               Edit Profile
             </a>
