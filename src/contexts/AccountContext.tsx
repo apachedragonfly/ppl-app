@@ -17,7 +17,7 @@ interface AccountContextType {
   currentProfile: Profile | null
   accounts: StoredAccount[]
   switchToAccount: (accountId: string) => Promise<void>
-  addAccount: (email: string, password: string) => Promise<void>
+  addAccount: (email: string, password: string, shouldRegister?: boolean) => Promise<void>
   removeAccount: (accountId: string) => void
   isLoading: boolean
 }
@@ -124,35 +124,49 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const addAccount = async (email: string, password: string) => {
+  const addAccount = async (email: string, password: string, shouldRegister = false) => {
     try {
       setIsLoading(true)
       
-      // Sign in with the new account
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      })
+      let data, error
+      
+      if (shouldRegister) {
+        // Register new account
+        const signUpResult = await supabase.auth.signUp({
+          email,
+          password
+        })
+        data = signUpResult.data
+        error = signUpResult.error
+      } else {
+        // Try to sign in first
+        const signInResult = await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+        data = signInResult.data
+        error = signInResult.error
+      }
 
       if (error) throw error
 
-      if (data.user && data.session) {
+      if (data?.user && data?.session) {
         // Load the profile for this user
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', data.user.id)
+          .eq('user_id', data.user!.id) // eslint-disable-line @typescript-eslint/no-non-null-assertion
           .maybeSingle()
 
         const newAccount: StoredAccount = {
-          user: data.user,
+          user: data.user!,
           profile: profileData,
           accessToken: data.session.access_token,
           refreshToken: data.session.refresh_token
         }
 
         // Check if account already exists
-        const existingIndex = accounts.findIndex(acc => acc.user.id === data.user.id)
+        const existingIndex = accounts.findIndex(acc => acc.user.id === data.user!.id) // eslint-disable-line @typescript-eslint/no-non-null-assertion
         let updatedAccounts: StoredAccount[]
 
         if (existingIndex >= 0) {
@@ -168,7 +182,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         saveAccountsToStorage(updatedAccounts)
         
         // Switch to the new account
-        setCurrentUser(data.user)
+        setCurrentUser(data.user!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
         setCurrentProfile(profileData)
       }
     } catch (error) {

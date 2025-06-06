@@ -12,20 +12,27 @@ export default function AccountSwitcher() {
   const [password, setPassword] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [error, setError] = useState('')
+  const [showRegisterOption, setShowRegisterOption] = useState(false)
 
-  const handleAddAccount = async (e: React.FormEvent) => {
+  const handleAddAccount = async (e: React.FormEvent, forceRegister = false) => {
     e.preventDefault()
     setIsAdding(true)
     setError('')
 
     try {
-      await addAccount(email, password)
+      await addAccount(email, password, forceRegister)
       setEmail('')
       setPassword('')
       setShowAddForm(false)
+      setShowRegisterOption(false)
       setIsOpen(false)
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      setError(error.message || 'Failed to add account')
+      if (error.message?.includes('Invalid login credentials') && !forceRegister) {
+        setShowRegisterOption(true)
+        setError('Account not found. Would you like to create a new account with these credentials?')
+      } else {
+        setError(error.message || 'Failed to add account')
+      }
     } finally {
       setIsAdding(false)
     }
@@ -171,26 +178,52 @@ export default function AccountSwitcher() {
                 {error && (
                   <p className="text-xs text-red-600">{error}</p>
                 )}
-                <div className="flex space-x-2">
-                  <button
-                    type="submit"
-                    disabled={isAdding}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors disabled:opacity-50"
-                  >
-                    {isAdding ? 'Adding...' : 'Add'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddForm(false)
-                      setError('')
-                      setEmail('')
-                      setPassword('')
-                    }}
-                    className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-                  >
-                    Cancel
-                  </button>
+                <div className="flex flex-col space-y-2">
+                  {showRegisterOption ? (
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={(e) => handleAddAccount(e, true)}
+                        disabled={isAdding}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-2 rounded-md transition-colors disabled:opacity-50"
+                      >
+                        {isAdding ? 'Creating...' : 'Create Account'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowRegisterOption(false)
+                          setError('')
+                        }}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        Back
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex space-x-2">
+                      <button
+                        type="submit"
+                        disabled={isAdding}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors disabled:opacity-50"
+                      >
+                        {isAdding ? 'Adding...' : 'Add Account'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddForm(false)
+                          setShowRegisterOption(false)
+                          setError('')
+                          setEmail('')
+                          setPassword('')
+                        }}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
               </form>
             )}
