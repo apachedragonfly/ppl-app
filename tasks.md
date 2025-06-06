@@ -160,5 +160,5 @@ At the end of each step, you should be able to:
 | 4     | Profile page         | ✅ Info saves and loads       |
 | 5     | Log workout          | ✅ Workout shows in dashboard |
 | 6     | Heatmap/chart        | ✅ Activity visualized        |
-| 7     | Routines             | ✅ Templates load into log    |
+| 7     | Routines             | ✅ Templates load into log    |verc
 | 8     | Deployed             | ✅ Live, mobile-friendly app  |

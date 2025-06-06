@@ -1,66 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
-import { User } from '@supabase/supabase-js'
-import { Profile } from '@/types'
+import { useAccount } from '@/contexts/AccountContext'
 import WorkoutHeatmap from '@/components/CalendarHeatmap'
 import ChartProgress from '@/components/ChartProgress'
 import GradientMenu from '@/components/GradientMenu'
+import AccountSwitcher from '@/components/AccountSwitcher'
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { currentUser, currentProfile, isLoading } = useAccount()
   const router = useRouter()
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      
-      if (!user) {
-        router.push('/login')
-        setLoading(false)
-        return
-      }
-
-      // Fetch user profile
-      try {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle()
-        
-        if (profileData) {
-          setProfile(profileData)
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error)
-      }
-      
-      setLoading(false)
+    if (!isLoading && !currentUser) {
+      router.push('/login')
     }
-
-    getUser()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_OUT') {
-          router.push('/login')
-        }
-        setUser(session?.user ?? null)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [router])
+  }, [currentUser, isLoading, router])
 
 
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -68,7 +28,7 @@ export default function Dashboard() {
     )
   }
 
-  if (!user) {
+  if (!currentUser) {
     return null
   }
 
@@ -79,23 +39,13 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <div className="flex items-center space-x-4">
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt="Profile"
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-2 border-gray-200">
-                  <span className="text-lg text-gray-600">👤</span>
-                </div>
-              )}
+              <AccountSwitcher />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
                   PPL Tracker Dashboard
                 </h1>
                 <p className="text-gray-600">
-                  Welcome back, {profile?.name || user.email}
+                  Welcome back, {currentProfile?.name || currentUser.email}
                 </p>
               </div>
             </div>
@@ -109,12 +59,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Workout Heatmap */}
           <div className="bg-white rounded-lg shadow">
-            <WorkoutHeatmap userId={user.id} />
+            <WorkoutHeatmap userId={currentUser.id} />
           </div>
 
           {/* Progress Chart */}
           <div className="bg-white rounded-lg shadow">
-            <ChartProgress userId={user.id} />
+            <ChartProgress userId={currentUser.id} />
           </div>
         </div>
       </div>
