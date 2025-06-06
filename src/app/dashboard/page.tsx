@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
+import { Profile } from '@/types'
 import WorkoutHeatmap from '@/components/CalendarHeatmap'
 import ChartProgress from '@/components/ChartProgress'
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
@@ -16,11 +18,29 @@ export default function Dashboard() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
-      setLoading(false)
       
       if (!user) {
         router.push('/login')
+        setLoading(false)
+        return
       }
+
+      // Fetch user profile
+      try {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        if (profileData) {
+          setProfile(profileData)
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+      }
+      
+      setLoading(false)
     }
 
     getUser()
@@ -59,13 +79,26 @@ export default function Dashboard() {
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                PPL Tracker Dashboard
-              </h1>
-              <p className="text-gray-600">
-                Welcome back, {user.email}
-              </p>
+            <div className="flex items-center space-x-4">
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-2 border-gray-200">
+                  <span className="text-lg text-gray-600">👤</span>
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  PPL Tracker Dashboard
+                </h1>
+                <p className="text-gray-600">
+                  Welcome back, {profile?.name || user.email}
+                </p>
+              </div>
             </div>
             <div className="flex space-x-3 mt-4 sm:mt-0">
               <a

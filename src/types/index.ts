@@ -6,6 +6,7 @@ export interface User {
 export interface Profile {
   id: string
   user_id: string
+  name?: string
   avatar_url?: string
   height_cm?: number
   weight_kg?: number
