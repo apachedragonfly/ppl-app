@@ -10,6 +10,17 @@ interface HeatmapValue {
   count: number
 }
 
+interface WorkoutDetail {
+  id: string
+  type: 'Push' | 'Pull' | 'Legs'
+  exercises: {
+    name: string
+    sets: number
+    reps: number
+    weight_kg: number
+  }[]
+}
+
 interface CalendarHeatmapProps {
   userId: string
   className?: string
@@ -18,21 +29,36 @@ interface CalendarHeatmapProps {
 export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatmapProps) {
   const [heatmapData, setHeatmapData] = useState<HeatmapValue[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null) // null = full year
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetail[]>([])
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     fetchHeatmapData()
-  }, [userId])
+  }, [userId, selectedYear, selectedMonth])
 
   const fetchHeatmapData = async () => {
     try {
-      const oneYearAgo = new Date()
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+      let startDate, endDate
+      
+      if (selectedMonth !== null) {
+        // Month view
+        startDate = new Date(selectedYear, selectedMonth, 1)
+        endDate = new Date(selectedYear, selectedMonth + 1, 0)
+      } else {
+        // Year view
+        startDate = new Date(selectedYear, 0, 1)
+        endDate = new Date(selectedYear, 11, 31)
+      }
 
       const { data: workouts, error } = await supabase
         .from('workouts')
         .select('date, type')
         .eq('user_id', userId)
-        .gte('date', oneYearAgo.toISOString().split('T')[0])
+        .gte('date', startDate.toISOString().split('T')[0])
+        .lte('date', endDate.toISOString().split('T')[0])
         .order('date', { ascending: true })
 
       if (error) throw error
@@ -55,6 +81,46 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
       console.error('Error fetching heatmap data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchWorkoutDetails = async (date: string) => {
+    try {
+      const { data: workouts, error } = await supabase
+        .from('workouts')
+        .select(`
+          id,
+          type,
+          workout_logs (
+            sets,
+            reps,
+            weight_kg,
+            exercise:exercises (
+              name
+            )
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('date', date)
+
+      if (error) throw error
+
+      const workoutDetails: WorkoutDetail[] = (workouts as any[]).map(workout => ({
+        id: workout.id,
+        type: workout.type,
+        exercises: workout.workout_logs.map((log: any) => ({
+          name: log.exercise?.name || 'Unknown Exercise',
+          sets: log.sets,
+          reps: log.reps,
+          weight_kg: log.weight_kg
+        }))
+      }))
+
+      setWorkoutDetails(workoutDetails)
+      setSelectedDate(date)
+      setShowModal(true)
+    } catch (error) {
+      console.error('Error fetching workout details:', error)
     }
   }
 
@@ -104,19 +170,67 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
     )
   }
 
+  let startDate, endDate
   const today = new Date()
-  const startDate = new Date()
-  startDate.setFullYear(startDate.getFullYear() - 1)
+  
+  if (selectedMonth !== null) {
+    // Month view
+    startDate = new Date(selectedYear, selectedMonth, 1)
+    endDate = new Date(selectedYear, selectedMonth + 1, 0)
+  } else {
+    // Year view
+    startDate = new Date(selectedYear, 0, 1)
+    endDate = new Date(selectedYear, 11, 31)
+  }
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
 
   return (
     <div className={`p-4 ${className}`}>
-      <h3 className="text-lg font-semibold mb-4 text-gray-900">Workout Activity</h3>
+      <div className="flex flex-col space-y-4 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Workout Activity</h3>
+        
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {years.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+
+          <select
+            value={selectedMonth ?? ''}
+            onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Full Year</option>
+            {months.map((month, index) => (
+              <option key={index} value={index}>{month}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="workout-heatmap">
         <CalendarHeatmap
           startDate={startDate}
-          endDate={today}
+          endDate={endDate}
           values={heatmapData}
           classForValue={classForValue}
+          onClick={(value) => {
+            if (value && value.date && value.count > 0) {
+              fetchWorkoutDetails(value.date)
+            }
+          }}
           showWeekdayLabels={true}
         />
       </div>
@@ -131,6 +245,63 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         </div>
         <span>More</span>
       </div>
+
+      {/* Workout Details Modal */}
+      {showModal && selectedDate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">
+                Workouts for {new Date(selectedDate).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </h4>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {workoutDetails.map((workout, index) => (
+                <div key={workout.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      workout.type === 'Push' ? 'bg-red-100 text-red-800' :
+                      workout.type === 'Pull' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {workout.type}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {workout.exercises.map((exercise, exerciseIndex) => (
+                      <div key={exerciseIndex} className="flex justify-between items-center text-sm">
+                        <span className="font-medium text-gray-700">{exercise.name}</span>
+                        <span className="text-gray-600">
+                          {exercise.sets} × {exercise.reps} @ {exercise.weight_kg}kg
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {workoutDetails.length === 0 && (
+                <div className="text-center text-gray-500 py-4">
+                  No workout details found for this date.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       
       <style jsx global>{`
         .workout-heatmap .react-calendar-heatmap {
@@ -160,6 +331,20 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         .workout-heatmap .react-calendar-heatmap text {
           font-size: 10px;
           fill: #aaa;
+        }
+
+        .workout-heatmap .react-calendar-heatmap .color-scale-1,
+        .workout-heatmap .react-calendar-heatmap .color-scale-2,
+        .workout-heatmap .react-calendar-heatmap .color-scale-3,
+        .workout-heatmap .react-calendar-heatmap .color-scale-4 {
+          cursor: pointer;
+        }
+
+        .workout-heatmap .react-calendar-heatmap .color-scale-1:hover,
+        .workout-heatmap .react-calendar-heatmap .color-scale-2:hover,
+        .workout-heatmap .react-calendar-heatmap .color-scale-3:hover,
+        .workout-heatmap .react-calendar-heatmap .color-scale-4:hover {
+          opacity: 0.8;
         }
       `}</style>
     </div>
