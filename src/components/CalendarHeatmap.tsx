@@ -8,6 +8,7 @@ import 'react-calendar-heatmap/dist/styles.css'
 interface HeatmapValue {
   date: string
   count: number
+  type?: 'Push' | 'Pull' | 'Legs' | 'Mixed'
 }
 
 interface WorkoutDetail {
@@ -32,13 +33,14 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null) // null = full year
+  const [selectedWorkoutType, setSelectedWorkoutType] = useState<string>('all') // all, Push, Pull, Legs
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetail[]>([])
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     fetchHeatmapData()
-  }, [userId, selectedYear, selectedMonth])
+  }, [userId, selectedYear, selectedMonth, selectedWorkoutType])
 
   const fetchHeatmapData = async () => {
     try {
@@ -54,28 +56,49 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         endDate = new Date(selectedYear, 11, 31)
       }
 
-      const { data: workouts, error } = await supabase
+      let query = supabase
         .from('workouts')
         .select('date, type')
         .eq('user_id', userId)
         .gte('date', startDate.toISOString().split('T')[0])
         .lte('date', endDate.toISOString().split('T')[0])
-        .order('date', { ascending: true })
+
+      // Apply workout type filter
+      if (selectedWorkoutType !== 'all') {
+        query = query.eq('type', selectedWorkoutType)
+      }
+
+      const { data: workouts, error } = await query.order('date', { ascending: true })
 
       if (error) throw error
 
-      // Group workouts by date and count them
+      // Group workouts by date, count them, and determine type
       const workoutsByDate = (workouts as Workout[]).reduce((acc, workout) => {
         const date = workout.date
-        acc[date] = (acc[date] || 0) + 1
+        if (!acc[date]) {
+          acc[date] = { count: 0, types: new Set() }
+        }
+        acc[date].count += 1
+        acc[date].types.add(workout.type)
         return acc
-      }, {} as Record<string, number>)
+      }, {} as Record<string, { count: number; types: Set<string> }>)
 
-      // Convert to heatmap format
-      const heatmapValues: HeatmapValue[] = Object.entries(workoutsByDate).map(([date, count]) => ({
-        date,
-        count
-      }))
+      // Convert to heatmap format with type information
+      const heatmapValues: HeatmapValue[] = Object.entries(workoutsByDate).map(([date, data]) => {
+        let type: 'Push' | 'Pull' | 'Legs' | 'Mixed'
+        
+        if (data.types.size === 1) {
+          type = Array.from(data.types)[0] as 'Push' | 'Pull' | 'Legs'
+        } else {
+          type = 'Mixed'
+        }
+
+        return {
+          date,
+          count: data.count,
+          type
+        }
+      })
 
       setHeatmapData(heatmapValues)
     } catch (error) {
@@ -155,39 +178,29 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
     }
   }
 
-  const getTooltipDataAttrs = (value: any) => {
-    if (!value || !value.date) {
-      return {
-        'data-tip': 'No workouts'
-      }
-    }
-    
-    const date = new Date(value.date)
-    const formattedDate = date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
-    })
-    
-    return {
-      'data-tip': `${formattedDate}: ${value.count || 0} workout(s)`
-    }
-  }
 
-  const classForValue = (value: any) => {
+
+  const classForValue = (value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!value || !value.count) {
       return 'color-empty'
     }
-    if (value.count >= 3) {
-      return 'color-scale-4'
+
+    const type = value.type || 'Mixed'
+    const intensity = Math.min(value.count, 4) // Cap at 4 levels
+
+    // Return type-specific classes
+    switch (type) {
+      case 'Push':
+        return `color-push-${intensity}`
+      case 'Pull':
+        return `color-pull-${intensity}`
+      case 'Legs':
+        return `color-legs-${intensity}`
+      case 'Mixed':
+        return `color-mixed-${intensity}`
+      default:
+        return 'color-empty'
     }
-    if (value.count >= 2) {
-      return 'color-scale-3'
-    }
-    if (value.count >= 1) {
-      return 'color-scale-2'
-    }
-    return 'color-scale-1'
   }
 
   if (loading) {
@@ -247,6 +260,17 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
               <option key={index} value={index}>{month}</option>
             ))}
           </select>
+
+          <select
+            value={selectedWorkoutType}
+            onChange={(e) => setSelectedWorkoutType(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">All Types</option>
+            <option value="Push">Push</option>
+            <option value="Pull">Pull</option>
+            <option value="Legs">Legs</option>
+          </select>
         </div>
       </div>
 
@@ -268,15 +292,63 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         </div>
       </div>
       <div className="flex items-center justify-between mt-3 text-sm text-gray-600">
-        <span>Less</span>
-        <div className="flex space-x-1">
-          <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-800 rounded-sm"></div>
+        <div className="flex items-center space-x-4">
+          <span>Less</span>
+          <div className="flex space-x-1">
+            <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
+            {selectedWorkoutType === 'all' ? (
+              <>
+                <div className="w-3 h-3 bg-red-300 rounded-sm" title="Push"></div>
+                <div className="w-3 h-3 bg-blue-300 rounded-sm" title="Pull"></div>
+                <div className="w-3 h-3 bg-green-300 rounded-sm" title="Legs"></div>
+                <div className="w-3 h-3 bg-purple-300 rounded-sm" title="Mixed"></div>
+              </>
+            ) : selectedWorkoutType === 'Push' ? (
+              <>
+                <div className="w-3 h-3 bg-red-200 rounded-sm"></div>
+                <div className="w-3 h-3 bg-red-400 rounded-sm"></div>
+                <div className="w-3 h-3 bg-red-600 rounded-sm"></div>
+                <div className="w-3 h-3 bg-red-800 rounded-sm"></div>
+              </>
+            ) : selectedWorkoutType === 'Pull' ? (
+              <>
+                <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
+                <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
+                <div className="w-3 h-3 bg-blue-600 rounded-sm"></div>
+                <div className="w-3 h-3 bg-blue-800 rounded-sm"></div>
+              </>
+            ) : selectedWorkoutType === 'Legs' ? (
+              <>
+                <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-800 rounded-sm"></div>
+              </>
+            ) : null}
+          </div>
+          <span>More</span>
         </div>
-        <span>More</span>
+        
+        {selectedWorkoutType === 'all' && (
+          <div className="flex items-center space-x-3 text-xs">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-red-500 rounded-sm"></div>
+              <span>Push</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-sm"></div>
+              <span>Pull</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-sm"></div>
+              <span>Legs</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-purple-500 rounded-sm"></div>
+              <span>Mixed</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Workout Details Modal */}
@@ -373,20 +445,60 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: #ebedf0;
         }
         
-        .workout-heatmap .react-calendar-heatmap .color-scale-1 {
-          fill: #c6e48b;
+        /* Push workout colors (Red) */
+        .workout-heatmap .react-calendar-heatmap .color-push-1 {
+          fill: #fecaca;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-push-2 {
+          fill: #f87171;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-push-3 {
+          fill: #dc2626;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-push-4 {
+          fill: #991b1b;
         }
         
-        .workout-heatmap .react-calendar-heatmap .color-scale-2 {
-          fill: #7bc96f;
+        /* Pull workout colors (Blue) */
+        .workout-heatmap .react-calendar-heatmap .color-pull-1 {
+          fill: #bfdbfe;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-pull-2 {
+          fill: #60a5fa;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-pull-3 {
+          fill: #2563eb;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-pull-4 {
+          fill: #1d4ed8;
         }
         
-        .workout-heatmap .react-calendar-heatmap .color-scale-3 {
-          fill: #239a3b;
+        /* Legs workout colors (Green) */
+        .workout-heatmap .react-calendar-heatmap .color-legs-1 {
+          fill: #bbf7d0;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-legs-2 {
+          fill: #4ade80;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-legs-3 {
+          fill: #16a34a;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-legs-4 {
+          fill: #15803d;
         }
         
-        .workout-heatmap .react-calendar-heatmap .color-scale-4 {
-          fill: #196127;
+        /* Mixed workout colors (Purple) */
+        .workout-heatmap .react-calendar-heatmap .color-mixed-1 {
+          fill: #ddd6fe;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-mixed-2 {
+          fill: #a78bfa;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-mixed-3 {
+          fill: #7c3aed;
+        }
+        .workout-heatmap .react-calendar-heatmap .color-mixed-4 {
+          fill: #5b21b6;
         }
         
         .workout-heatmap .react-calendar-heatmap text {
@@ -394,17 +506,17 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: #aaa;
         }
 
-        .workout-heatmap .react-calendar-heatmap .color-scale-1,
-        .workout-heatmap .react-calendar-heatmap .color-scale-2,
-        .workout-heatmap .react-calendar-heatmap .color-scale-3,
-        .workout-heatmap .react-calendar-heatmap .color-scale-4 {
+        .workout-heatmap .react-calendar-heatmap [class*="color-push-"],
+        .workout-heatmap .react-calendar-heatmap [class*="color-pull-"],
+        .workout-heatmap .react-calendar-heatmap [class*="color-legs-"],
+        .workout-heatmap .react-calendar-heatmap [class*="color-mixed-"] {
           cursor: pointer;
         }
 
-        .workout-heatmap .react-calendar-heatmap .color-scale-1:hover,
-        .workout-heatmap .react-calendar-heatmap .color-scale-2:hover,
-        .workout-heatmap .react-calendar-heatmap .color-scale-3:hover,
-        .workout-heatmap .react-calendar-heatmap .color-scale-4:hover {
+        .workout-heatmap .react-calendar-heatmap [class*="color-push-"]:hover,
+        .workout-heatmap .react-calendar-heatmap [class*="color-pull-"]:hover,
+        .workout-heatmap .react-calendar-heatmap [class*="color-legs-"]:hover,
+        .workout-heatmap .react-calendar-heatmap [class*="color-mixed-"]:hover {
           opacity: 0.8;
         }
       `}</style>
