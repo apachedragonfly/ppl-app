@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💪 PPL Tracker - Push/Pull/Legs Workout Tracker
 
-## Getting Started
+A modern, mobile-first workout tracking app built with Next.js and Supabase.
 
-First, run the development server:
+## ⚡ Quick Setup
 
+### 1. Clone and Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url>
+cd ppl-app
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Setup
+Create `.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Database Setup
+1. Go to your Supabase dashboard
+2. Navigate to SQL Editor
+3. Copy and paste the entire contents of `database-setup.sql`
+4. Run the script
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This will create:
+- All required tables (profiles, exercises, workouts, etc.)
+- Row Level Security policies
+- Default exercises
 
-## Learn More
+### 4. Run Development Server
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏗️ Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                 # Next.js app router
+│   ├── (auth)/         # Auth pages (login/register)
+│   ├── dashboard/      # Main app pages
+│   └── layout.tsx      # Root layout
+├── components/         # Reusable components
+│   ├── ui/            # shadcn/ui components
+│   ├── WorkoutForm.tsx
+│   ├── CalendarHeatmap.tsx
+│   └── ChartProgress.tsx
+├── lib/               # Utilities
+│   └── supabase.ts    # Supabase client
+└── types/             # TypeScript types
+    └── index.ts
+```
 
-## Deploy on Vercel
+## 🚀 Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **User Authentication** - Email/password login with Supabase Auth
+- **Profile Management** - Track height, weight, age
+- **Workout Logging** - Log Push/Pull/Legs workouts with exercises
+- **Visual Progress** - Calendar heatmap and progress charts
+- **Responsive Design** - Mobile-first, works on all devices
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 Tech Stack
+
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, RLS)
+- **Charts**: Recharts, React Calendar Heatmap
+- **UI Components**: shadcn/ui
+
+## 📱 Mobile PWA Ready
+
+This app is designed mobile-first and can be installed as a PWA on mobile devices.
+
+## 🤝 Contributing
+
+This project follows a task-based development approach. See `tasks.md` for the build plan and current progress.
+
+## 📄 License
+
+MIT License

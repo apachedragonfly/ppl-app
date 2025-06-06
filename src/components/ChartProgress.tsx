@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase'
 
 interface ProgressData {
   date: string
-  volume: number
   maxWeight: number
+  max1RM: number
   exercise: string
 }
 
@@ -20,7 +20,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
   const [progressData, setProgressData] = useState<ProgressData[]>([])
   const [exercises, setExercises] = useState<any[]>([])
   const [selectedExercise, setSelectedExercise] = useState<string>(exerciseId || '')
-  const [chartType, setChartType] = useState<'volume' | 'weight'>('volume')
+  const [chartType, setChartType] = useState<'weight' | '1rm'>('weight')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -78,15 +78,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         if (!dataByDate[date]) {
           dataByDate[date] = {
             date,
-            volume: 0,
             maxWeight: 0,
+            max1RM: 0,
             exercise: log.exercise?.name || 'Unknown'
           }
         }
 
-        const volume = log.sets * log.reps * log.weight_kg
-        dataByDate[date].volume += volume
+        // Calculate 1RM for this set: 1RM = Weight x (1 + 0.0333 x Reps)
+        const oneRM = log.weight_kg * (1 + 0.0333 * log.reps)
+        
         dataByDate[date].maxWeight = Math.max(dataByDate[date].maxWeight, log.weight_kg)
+        dataByDate[date].max1RM = Math.max(dataByDate[date].max1RM, oneRM)
       })
 
       const chartData = Object.values(dataByDate).sort((a, b) => 
@@ -152,16 +154,6 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
 
           <div className="flex space-x-2">
             <button
-              onClick={() => setChartType('volume')}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                chartType === 'volume'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Volume
-            </button>
-            <button
               onClick={() => setChartType('weight')}
               className={`px-4 py-2 rounded-md transition-colors ${
                 chartType === 'weight'
@@ -169,7 +161,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              Max Weight
+              Weight
+            </button>
+            <button
+              onClick={() => setChartType('1rm')}
+              className={`px-4 py-2 rounded-md transition-colors ${
+                chartType === '1rm'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              1RM
             </button>
           </div>
         </div>
@@ -177,31 +179,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          {chartType === 'volume' ? (
-            <BarChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={formatDate}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis />
-              <Tooltip 
-                labelFormatter={(value) => `Date: ${formatDate(value as string)}`}
-                formatter={(value, name) => [
-                  `${value} kg`,
-                  name === 'volume' ? 'Total Volume' : 'Max Weight'
-                ]}
-              />
-              <Bar 
-                dataKey="volume" 
-                fill="#3b82f6" 
-                name="volume"
-              />
-            </BarChart>
-          ) : (
+          {chartType === 'weight' ? (
             <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
@@ -216,16 +194,43 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                 labelFormatter={(value) => `Date: ${formatDate(value as string)}`}
                 formatter={(value, name) => [
                   `${value} kg`,
-                  name === 'maxWeight' ? 'Max Weight' : 'Volume'
+                  name === 'maxWeight' ? 'Max Weight' : 'Weight'
                 ]}
               />
               <Line 
                 type="monotone" 
                 dataKey="maxWeight" 
+                stroke="#3b82f6" 
+                strokeWidth={2}
+                dot={{ fill: '#3b82f6' }}
+                name="maxWeight"
+              />
+            </LineChart>
+          ) : (
+            <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={formatDate}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis />
+              <Tooltip 
+                labelFormatter={(value) => `Date: ${formatDate(value as string)}`}
+                formatter={(value, name) => [
+                  `${Math.round(value as number)} kg`,
+                  name === 'max1RM' ? '1RM' : '1RM'
+                ]}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="max1RM" 
                 stroke="#ef4444" 
                 strokeWidth={2}
                 dot={{ fill: '#ef4444' }}
-                name="maxWeight"
+                name="max1RM"
               />
             </LineChart>
           )}
@@ -235,9 +240,9 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
       <div className="mt-4 text-sm text-gray-600">
         <p>
           <strong>{selectedExerciseName}</strong> - {
-            chartType === 'volume' 
-              ? 'Total volume (sets × reps × weight) per workout session'
-              : 'Highest weight lifted per workout session'
+            chartType === 'weight' 
+              ? 'Highest weight lifted per workout session'
+              : 'Estimated 1 Rep Max using formula: Weight × (1 + 0.0333 × Reps)'
           }
         </p>
       </div>

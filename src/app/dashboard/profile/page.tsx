@@ -39,9 +39,14 @@ export default function ProfilePage() {
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
+        // If table doesn't exist, provide helpful error message
+        if (error.code === 'PGRST116' || error.message.includes('relation "profiles" does not exist')) {
+          setError('Database tables not set up. Please run the database setup script.')
+          return
+        }
         throw error
       }
 
@@ -51,9 +56,15 @@ export default function ProfilePage() {
         setWeight(data.weight_kg?.toString() || '')
         setAge(data.age?.toString() || '')
       }
-    } catch (error) {
-      console.error('Error loading profile:', error)
-      setError('Failed to load profile')
+      // If no profile exists yet, that's fine - user can create one
+    } catch (error: any) {
+      console.error('Error loading profile:', {
+        error,
+        message: error?.message,
+        code: error?.code,
+        details: error?.details
+      })
+      setError(`Failed to load profile: ${error?.message || 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -83,9 +94,14 @@ export default function ProfilePage() {
 
       setMessage('Profile updated successfully!')
       setTimeout(() => setMessage(''), 3000)
-    } catch (error) {
-      console.error('Error saving profile:', error)
-      setError('Failed to save profile')
+    } catch (error: any) {
+      console.error('Error saving profile:', {
+        error,
+        message: error?.message,
+        code: error?.code,
+        details: error?.details
+      })
+      setError(`Failed to save profile: ${error?.message || 'Unknown error'}`)
     } finally {
       setSaving(false)
     }
