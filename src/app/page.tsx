@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
+import Link from 'next/link'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     const getUser = async () => {
@@ -17,6 +20,11 @@ export default function Home() {
         }
         setUser(user)
         console.log('Authenticated user:', user)
+        
+        // Redirect authenticated users to dashboard
+        if (user) {
+          router.push('/dashboard')
+        }
       } catch (error) {
         console.error('Supabase connection error:', error)
       } finally {
@@ -25,36 +33,47 @@ export default function Home() {
     }
 
     getUser()
-  }, [])
+  }, [router])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
+
+  // Show landing page for non-authenticated users
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Push/Pull/Legs Tracker
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            💪 PPL Tracker
           </h1>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Supabase Connection Test</h2>
-            {loading ? (
-              <p className="text-gray-600">Testing connection...</p>
-            ) : (
-              <div>
-                <p className="text-sm text-gray-600 mb-2">
-                  Check console for full details
-                </p>
-                <div className="bg-gray-100 p-3 rounded text-sm">
-                  <strong>User Status:</strong>{' '}
-                  {user ? (
-                    <span className="text-green-600">
-                      Authenticated ({user.email})
-                    </span>
-                  ) : (
-                    <span className="text-red-600">Not authenticated (null)</span>
-                  )}
-                </div>
-              </div>
-            )}
+          <p className="text-lg text-gray-600 mb-8">
+            Track your Push, Pull, and Legs workouts with ease
+          </p>
+          
+          <div className="space-y-4">
+            <Link
+              href="/login"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-md transition-colors block text-center"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="w-full bg-white hover:bg-gray-50 text-indigo-600 font-medium py-3 px-4 rounded-md border border-indigo-600 transition-colors block text-center"
+            >
+              Create Account
+            </Link>
+          </div>
+
+          <div className="mt-8 text-sm text-gray-500">
+            <p>✓ Log your workouts</p>
+            <p>✓ Track your progress</p>
+            <p>✓ Save workout routines</p>
           </div>
         </div>
       </div>

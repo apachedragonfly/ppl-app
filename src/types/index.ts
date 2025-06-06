@@ -13,6 +13,14 @@ export interface Profile {
   created_at: string
 }
 
+export interface Exercise {
+  id: string
+  user_id?: string // NULL for global exercises
+  name: string
+  muscle_group: string
+  created_at: string
+}
+
 export interface Workout {
   id: string
   user_id: string
@@ -25,10 +33,11 @@ export interface Workout {
 export interface WorkoutLog {
   id: string
   workout_id: string
-  exercise: string
+  exercise_id: string
   sets: number
   reps: number
   weight_kg: number
+  exercise?: Exercise
 }
 
 export interface Routine {
@@ -42,9 +51,12 @@ export interface Routine {
 export interface RoutineExercise {
   id: string
   routine_id: string
-  exercise: string
+  exercise_id: string
+  order_index: number
   sets: number
   reps: number
   weight_kg?: number
-  order_index: number
-} 
+  exercise?: Exercise
+}
+
+export type WorkoutType = 'Push' | 'Pull' | 'Legs' 
