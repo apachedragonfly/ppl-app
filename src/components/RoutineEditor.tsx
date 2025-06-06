@@ -76,10 +76,36 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
     }
   }
 
+  // Filter exercises by workout type and remove duplicates
+  const getFilteredExercises = () => {
+    const typeMapping: Record<WorkoutType, string[]> = {
+      'Push': ['Chest', 'Shoulders', 'Triceps'],
+      'Pull': ['Back', 'Biceps'],
+      'Legs': ['Legs']
+    }
+    
+    const targetMuscles = typeMapping[type] || []
+    const filtered = availableExercises.filter(ex => 
+      targetMuscles.includes(ex.muscle_group || '')
+    )
+    
+    // Remove duplicates by name
+    const unique = filtered.reduce((acc, current) => {
+      const existing = acc.find(item => item.name === current.name)
+      if (!existing) {
+        acc.push(current)
+      }
+      return acc
+    }, [] as typeof availableExercises)
+    
+    return unique.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
   const addExercise = () => {
+    const filteredExercises = getFilteredExercises()
     const newExercise: RoutineExerciseForm = {
       tempId: Date.now().toString(),
-      exercise_id: availableExercises[0]?.id || '',
+      exercise_id: filteredExercises[0]?.id || '',
       order_index: exercises.length,
       sets: 3,
       reps: 10,
@@ -238,7 +264,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
             <button
               type="button"
               onClick={addExercise}
-              disabled={availableExercises.length === 0}
+              disabled={getFilteredExercises().length === 0}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
             >
               Add Exercise
@@ -279,7 +305,8 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
                                     onChange={(e) => updateExercise(exercise.tempId, 'exercise_id', e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   >
-                                    {availableExercises.map((ex) => (
+                                    <option value="">Select exercise...</option>
+                                    {getFilteredExercises().map((ex) => (
                                       <option key={ex.id} value={ex.id}>{ex.name}</option>
                                     ))}
                                   </select>

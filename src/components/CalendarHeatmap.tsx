@@ -125,6 +125,36 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
     }
   }
 
+  const handleEditWorkout = (workoutId: string) => {
+    // Store workout ID for editing and navigate to edit page
+    localStorage.setItem('editWorkoutId', workoutId)
+    window.location.href = `/workouts/edit/${workoutId}`
+  }
+
+  const handleDeleteWorkout = async (workoutId: string) => {
+    if (!confirm('Are you sure you want to delete this workout?')) return
+
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', workoutId)
+
+      if (error) throw error
+
+      // Refresh heatmap data
+      fetchHeatmapData()
+      
+      // Update the modal by refetching details for the same date
+      if (selectedDate) {
+        fetchWorkoutDetails(selectedDate)
+      }
+    } catch (error) {
+      console.error('Error deleting workout:', error)
+      alert('Failed to delete workout')
+    }
+  }
+
   const getTooltipDataAttrs = (value: any) => {
     if (!value || !value.date) {
       return {
@@ -172,7 +202,6 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
   }
 
   let startDate, endDate
-  const today = new Date()
   
   if (selectedMonth !== null) {
     // Month view
@@ -282,6 +311,20 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
                     }`}>
                       {workout.type}
                     </span>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditWorkout(workout.id)}
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteWorkout(workout.id)}
+                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2">

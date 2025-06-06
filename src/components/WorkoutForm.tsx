@@ -219,7 +219,22 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                     required
                   >
                     <option value="">Select exercise...</option>
-                    {exercises.filter(e => e.muscle_group === workoutType).map(exercise => (
+                    {exercises.filter(e => {
+                      const typeMapping: Record<WorkoutType, string[]> = {
+                        'Push': ['Chest', 'Shoulders', 'Triceps'],
+                        'Pull': ['Back', 'Biceps'],
+                        'Legs': ['Legs']
+                      }
+                      const targetMuscles = typeMapping[workoutType] || []
+                      return targetMuscles.includes(e.muscle_group || '')
+                    }).reduce((acc, current) => {
+                      // Remove duplicates by name
+                      const existing = acc.find(item => item.name === current.name)
+                      if (!existing) {
+                        acc.push(current)
+                      }
+                      return acc
+                    }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name)).map(exercise => (
                       <option key={exercise.id} value={exercise.id}>
                         {exercise.name}
                       </option>

@@ -81,6 +81,12 @@ export default function Dashboard() {
                 Routines
               </a>
               <a
+                href="/workouts/history"
+                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              >
+                History
+              </a>
+              <a
                 href="/dashboard/profile"
                 className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
               >
