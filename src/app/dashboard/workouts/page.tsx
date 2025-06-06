@@ -95,7 +95,11 @@ export default function WorkoutsPage() {
           ) : (
             <div className="space-y-3">
               {workouts.map((workout) => (
-                <WorkoutCard key={workout.id} workout={workout} />
+                <WorkoutCard 
+                  key={workout.id} 
+                  workout={workout} 
+                  onDeleted={loadWorkouts}
+                />
               ))}
             </div>
           )}

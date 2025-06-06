@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import { Workout, WorkoutLog } from '@/types'
 
 interface WorkoutCardProps {
@@ -10,9 +12,13 @@ interface WorkoutCardProps {
       }
     })[]
   }
+  onDeleted?: () => void
 }
 
-export default function WorkoutCard({ workout }: WorkoutCardProps) {
+export default function WorkoutCard({ workout, onDeleted }: WorkoutCardProps) {
+  const [deleting, setDeleting] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'short',
@@ -40,6 +46,26 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
     }
   }
 
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', workout.id)
+
+      if (error) throw error
+      
+      onDeleted?.()
+    } catch (error) {
+      console.error('Error deleting workout:', error)
+      alert('Failed to delete workout')
+    } finally {
+      setDeleting(false)
+      setShowConfirm(false)
+    }
+  }
+
   return (
     <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
       <div className="flex items-center justify-between mb-3">
@@ -51,8 +77,17 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
             {formatDate(workout.date)}
           </span>
         </div>
-        <div className="text-sm text-gray-500">
-          {getTotalVolume().toFixed(0)} kg total
+        <div className="flex items-center space-x-2">
+          <div className="text-sm text-gray-500">
+            {getTotalVolume().toFixed(0)} kg total
+          </div>
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="text-red-600 hover:text-red-700 text-sm font-medium"
+            disabled={deleting}
+          >
+            🗑️
+          </button>
         </div>
       </div>
 
@@ -72,6 +107,30 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
       {workout.workout_logs.length === 0 && (
         <div className="text-sm text-gray-500 italic">
           No exercises logged
+        </div>
+      )}
+
+      {showConfirm && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700">Delete this workout?</span>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="text-sm text-gray-600 hover:text-gray-700"
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-sm text-red-600 hover:text-red-700 font-medium"
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
