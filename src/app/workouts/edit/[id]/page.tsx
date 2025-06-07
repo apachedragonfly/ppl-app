@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase'
 import { Exercise, WorkoutType } from '@/types'
 
 interface WorkoutLog {
   id: string
+  tempId: string
   exercise_id: string
   exercise_name: string
   sets: number
@@ -91,6 +93,7 @@ export default function EditWorkoutPage() {
         type: data.type,
         workout_logs: data.workout_logs.map((log: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
           id: log.id,
+          tempId: log.id, // Use existing id as tempId for loaded exercises
           exercise_id: log.exercise_id,
           exercise_name: log.exercise?.name || 'Unknown Exercise',
           sets: log.sets,
@@ -146,17 +149,23 @@ export default function EditWorkoutPage() {
     return unique.sort((a, b) => a.name.localeCompare(b.name))
   }
 
-  const updateWorkoutLog = (index: number, field: keyof WorkoutLog, value: string | number) => {
+  const updateWorkoutLog = (tempId: string, field: keyof WorkoutLog, value: string | number) => {
     if (!workout) return
 
-    const updated = [...workout.workout_logs]
-    if (field === 'exercise_id') {
-      const exercise = exercises.find(e => e.id === value)
-      updated[index].exercise_id = value as string
-      updated[index].exercise_name = exercise?.name || ''
-    } else {
-      updated[index] = { ...updated[index], [field]: value }
-    }
+    const updated = workout.workout_logs.map(log => {
+      if (log.tempId !== tempId) return log
+      
+      if (field === 'exercise_id') {
+        const exercise = exercises.find(e => e.id === value)
+        return {
+          ...log,
+          exercise_id: value as string,
+          exercise_name: exercise?.name || ''
+        }
+      } else {
+        return { ...log, [field]: value }
+      }
+    })
     
     setWorkout({ ...workout, workout_logs: updated })
   }
@@ -167,6 +176,7 @@ export default function EditWorkoutPage() {
     const filteredExercises = getFilteredExercises()
     const newLog: WorkoutLog = {
       id: `new-${Date.now()}`,
+      tempId: `new-${Date.now()}`,
       exercise_id: filteredExercises[0]?.id || '',
       exercise_name: filteredExercises[0]?.name || '',
       sets: 3,
@@ -180,13 +190,23 @@ export default function EditWorkoutPage() {
     })
   }
 
-  const removeExerciseLog = (index: number) => {
+  const removeExerciseLog = (tempId: string) => {
     if (!workout) return
     
     setWorkout({
       ...workout,
-      workout_logs: workout.workout_logs.filter((_, i) => i !== index)
+      workout_logs: workout.workout_logs.filter(log => log.tempId !== tempId)
     })
+  }
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination || !workout) return
+
+    const items = Array.from(workout.workout_logs)
+    const [reorderedItem] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reorderedItem)
+
+    setWorkout({ ...workout, workout_logs: items })
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -262,20 +282,20 @@ export default function EditWorkoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => router.back()}
-            className="text-primary hover:text-primary/80 font-medium mb-4"
+            className="text-primary hover:text-primary/80 font-medium mb-3 sm:mb-4 text-sm sm:text-base"
           >
             ← Back
           </button>
-          <h1 className="text-3xl font-bold text-foreground">Edit Workout</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Edit Workout</h1>
         </div>
 
-        <div className="bg-card border border-border rounded-lg shadow p-6">
+        <div className="bg-card border border-border rounded-lg shadow p-4 sm:p-6">
           <form onSubmit={handleSave} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-card-foreground mb-1">
                   Date
@@ -318,81 +338,115 @@ export default function EditWorkoutPage() {
                 </button>
               </div>
 
-              {workout.workout_logs.map((log, index) => (
-                <div key={log.id} className="bg-secondary/20 border border-border p-4 rounded-lg">
-                  <div className="grid grid-cols-1 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-card-foreground mb-1">
-                        Exercise
-                      </label>
-                      <select
-                        value={log.exercise_id}
-                        onChange={(e) => updateWorkoutLog(index, 'exercise_id', e.target.value)}
-                        className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-                        required
-                      >
-                        <option value="">Select exercise...</option>
-                        {getFilteredExercises().map(exercise => (
-                          <option key={exercise.id} value={exercise.id}>
-                            {exercise.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-xs font-medium text-card-foreground mb-1">
-                          Sets
-                        </label>
-                        <input
-                          type="number"
-                          value={log.sets}
-                          onChange={(e) => updateWorkoutLog(index, 'sets', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                          min="1"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-card-foreground mb-1">
-                          Reps
-                        </label>
-                        <input
-                          type="number"
-                          value={log.reps}
-                          onChange={(e) => updateWorkoutLog(index, 'reps', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                          min="1"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-card-foreground mb-1">
-                          Weight (kg)
-                        </label>
-                        <input
-                          type="number"
-                          value={log.weight_kg}
-                          onChange={(e) => updateWorkoutLog(index, 'weight_kg', parseFloat(e.target.value))}
-                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                          min="0"
-                          step="0.5"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeExerciseLog(index)}
-                      className="text-destructive hover:text-destructive/80 text-sm font-medium self-start"
-                    >
-                      Remove Exercise
-                    </button>
-                  </div>
+              {workout.workout_logs.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No exercises added yet. Click &quot;+ Add Exercise&quot; to get started.
                 </div>
-              ))}
+              ) : (
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId="edit-workout-exercises">
+                    {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                        {workout.workout_logs.map((log, index) => (
+                          <Draggable key={log.tempId} draggableId={log.tempId} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`p-4 rounded-lg border border-border ${
+                                  snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary/20'
+                                }`}
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="text-muted-foreground cursor-move hover:text-foreground mt-2"
+                                  >
+                                    ⋮⋮
+                                  </div>
+
+                                  <div className="flex-1 grid grid-cols-1 gap-3">
+                                    <div>
+                                      <label className="block text-sm font-medium text-card-foreground mb-1">
+                                        Exercise
+                                      </label>
+                                      <select
+                                        value={log.exercise_id}
+                                        onChange={(e) => updateWorkoutLog(log.tempId, 'exercise_id', e.target.value)}
+                                        className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                                        required
+                                      >
+                                        <option value="">Select exercise...</option>
+                                        {getFilteredExercises().map(exercise => (
+                                          <option key={exercise.id} value={exercise.id}>
+                                            {exercise.name}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <div>
+                                        <label className="block text-xs font-medium text-card-foreground mb-1">
+                                          Sets
+                                        </label>
+                                        <input
+                                          type="number"
+                                          value={log.sets}
+                                          onChange={(e) => updateWorkoutLog(log.tempId, 'sets', parseInt(e.target.value))}
+                                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                          min="1"
+                                          required
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-card-foreground mb-1">
+                                          Reps
+                                        </label>
+                                        <input
+                                          type="number"
+                                          value={log.reps}
+                                          onChange={(e) => updateWorkoutLog(log.tempId, 'reps', parseInt(e.target.value))}
+                                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                          min="1"
+                                          required
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-card-foreground mb-1">
+                                          Weight (kg)
+                                        </label>
+                                        <input
+                                          type="number"
+                                          value={log.weight_kg}
+                                          onChange={(e) => updateWorkoutLog(log.tempId, 'weight_kg', parseFloat(e.target.value))}
+                                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                          min="0"
+                                          step="0.5"
+                                          required
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => removeExerciseLog(log.tempId)}
+                                    className="text-destructive hover:text-destructive/80 font-bold text-lg"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              )}
             </div>
 
             {error && (

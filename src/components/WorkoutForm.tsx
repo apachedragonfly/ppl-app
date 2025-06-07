@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase'
 import { Exercise, WorkoutType } from '@/types'
 
 interface WorkoutLog {
+  tempId: string
   exercise_id: string
   exercise_name: string
   sets: number
@@ -42,6 +44,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
         
         // Convert routine exercises to workout logs
         const logs: WorkoutLog[] = routine.routine_exercises.map((re: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+          tempId: `routine-${re.exercise_id}-${Date.now()}`,
           exercise_id: re.exercise_id,
           exercise_name: re.exercise?.name || '',
           sets: re.sets,
@@ -147,6 +150,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
   const addExerciseLog = () => {
     setWorkoutLogs([...workoutLogs, {
+      tempId: `new-${Date.now()}`,
       exercise_id: '',
       exercise_name: '',
       sets: 3,
@@ -155,41 +159,52 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
     }])
   }
 
-  const updateExerciseLog = async (index: number, field: keyof WorkoutLog, value: string | number) => {
-    const updated = [...workoutLogs]
-    if (field === 'exercise_id') {
-      const exercise = exercises.find(e => e.id === value)
-      updated[index].exercise_id = value as string
-      updated[index].exercise_name = exercise?.name || ''
+  const updateExerciseLog = async (tempId: string, field: keyof WorkoutLog, value: string | number) => {
+    const updated = workoutLogs.map(log => {
+      if (log.tempId !== tempId) return log
       
-      // Fetch last values for this exercise
-      const lastValues = await getLastValuesForExercise(value as string)
-      if (lastValues) {
-        updated[index].last_weight = lastValues.weight
-        updated[index].last_sets = lastValues.sets
-        updated[index].last_reps = lastValues.reps
-        updated[index].weight_kg = lastValues.weight // Set as defaults
-        updated[index].sets = lastValues.sets
-        updated[index].reps = lastValues.reps
+      if (field === 'exercise_id') {
+        const exercise = exercises.find(e => e.id === value)
+        const updatedLog = { 
+          ...log, 
+          exercise_id: value as string,
+          exercise_name: exercise?.name || ''
+        }
+        
+        // Fetch last values for this exercise and update later
+        getLastValuesForExercise(value as string).then(lastValues => {
+          if (lastValues) {
+            setWorkoutLogs(prevLogs => prevLogs.map(prevLog => 
+              prevLog.tempId === tempId ? {
+                ...prevLog,
+                last_weight: lastValues.weight,
+                last_sets: lastValues.sets,
+                last_reps: lastValues.reps,
+                weight_kg: lastValues.weight,
+                sets: lastValues.sets,
+                reps: lastValues.reps
+              } : prevLog
+            ))
+          } else {
+            setWorkoutLogs(prevLogs => prevLogs.map(prevLog => 
+              prevLog.tempId === tempId ? {
+                ...prevLog,
+                last_weight: undefined,
+                last_sets: undefined,
+                last_reps: undefined,
+                weight_kg: 0,
+                sets: 3,
+                reps: 8
+              } : prevLog
+            ))
+          }
+        })
+        
+        return updatedLog
       } else {
-        // Clear previous values if no history exists for this exercise
-        updated[index].last_weight = undefined
-        updated[index].last_sets = undefined
-        updated[index].last_reps = undefined
-        // Reset to sensible defaults
-        updated[index].weight_kg = 0
-        updated[index].sets = 3
-        updated[index].reps = 8
+        return { ...log, [field]: value }
       }
-    } else if (field === 'exercise_name') {
-      updated[index].exercise_name = value as string
-    } else if (field === 'sets') {
-      updated[index].sets = value as number
-    } else if (field === 'reps') {
-      updated[index].reps = value as number
-    } else if (field === 'weight_kg') {
-      updated[index].weight_kg = value as number
-    }
+    })
     setWorkoutLogs(updated)
   }
 
@@ -253,8 +268,18 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
     }
   }
 
-  const removeExerciseLog = (index: number) => {
-    setWorkoutLogs(workoutLogs.filter((_, i) => i !== index))
+  const removeExerciseLog = (tempId: string) => {
+    setWorkoutLogs(workoutLogs.filter(log => log.tempId !== tempId))
+  }
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return
+
+    const items = Array.from(workoutLogs)
+    const [reorderedItem] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reorderedItem)
+
+    setWorkoutLogs(items)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -321,7 +346,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
       <h2 className="text-xl font-bold text-foreground mb-4">Log Workout</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               Date
@@ -364,140 +389,169 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
             </button>
           </div>
 
-          {workoutLogs.map((log, index) => (
-            <div key={index} className="bg-secondary p-4 rounded-lg border border-border">
-              <div className="grid grid-cols-1 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Exercise
-                  </label>
-                  <select
-                    value={log.exercise_id}
-                    onChange={(e) => updateExerciseLog(index, 'exercise_id', e.target.value)}
-                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
-                    required
-                  >
-                    <option value="">Select exercise...</option>
-                    {exercises.filter(e => {
-                      const typeMapping: Record<WorkoutType, string[]> = {
-                        'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
-                        'Pull': ['Back', 'Biceps', 'Pull'],
-                        'Legs': ['Legs']
-                      }
-                      const targetMuscles = typeMapping[workoutType] || []
-                      const matches = targetMuscles.includes(e.muscle_group || '')
-                      
-                      // Debug logging
-                      if (e.name.toLowerCase().includes('bench') || e.name.toLowerCase().includes('squat') || e.name.toLowerCase().includes('row')) {
-                        console.log(`Exercise: ${e.name}, Muscle Group: ${e.muscle_group}, Workout Type: ${workoutType}, Target Muscles: ${targetMuscles.join(', ')}, Matches: ${matches}`)
-                      }
-                      
-                      return matches
-                    }).reduce((acc, current) => {
-                      // Remove duplicates by name
-                      const existing = acc.find(item => item.name === current.name)
-                      if (!existing) {
-                        acc.push(current)
-                      }
-                      return acc
-                    }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name)).map(exercise => (
-                      <option key={exercise.id} value={exercise.id}>
-                        {exercise.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1">
-                      Sets
-                      {log.last_sets && (
-                        <span className="text-xs text-muted-foreground ml-1">
-                          (Last: {log.last_sets})
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type="number"
-                      value={log.sets || ''}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
-                        updateExerciseLog(index, 'sets', value)
-                      }}
-                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                      min="1"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1">
-                      Reps
-                      {log.last_reps && (
-                        <span className="text-xs text-muted-foreground ml-1">
-                          (Last: {log.last_reps})
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type="number"
-                      value={log.reps || ''}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
-                        updateExerciseLog(index, 'reps', value)
-                      }}
-                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                      min="1"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1">
-                      Weight (kg)
-                      {log.last_weight && (
-                        <span className="text-xs text-muted-foreground ml-1">
-                          (Last: {log.last_weight}kg)
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type="number"
-                      value={log.weight_kg || ''}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value)
-                        updateExerciseLog(index, 'weight_kg', value)
-                      }}
-                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                      min="0"
-                      step="0.5"
-                      required
-                    />
-                    {log.last_weight && log.weight_kg !== log.last_weight && (
-                      <div className="text-xs mt-1">
-                        {log.weight_kg > log.last_weight ? (
-                          <span className="text-green-400">
-                            +{(log.weight_kg - log.last_weight).toFixed(1)}kg from last time 💪
-                          </span>
-                        ) : log.weight_kg < log.last_weight ? (
-                          <span className="text-orange-400">
-                            -{(log.last_weight - log.weight_kg).toFixed(1)}kg from last time
-                          </span>
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeExerciseLog(index)}
-                  className="text-destructive hover:text-destructive/80 text-sm font-medium self-start"
-                >
-                  Remove Exercise
-                </button>
-              </div>
+          {workoutLogs.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No exercises added yet. Click &quot;+ Add Exercise&quot; to get started.
             </div>
-          ))}
+          ) : (
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="workout-exercises">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                    {workoutLogs.map((log, index) => (
+                      <Draggable key={log.tempId} draggableId={log.tempId} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`p-4 rounded-lg border border-border ${
+                              snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary'
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div
+                                {...provided.dragHandleProps}
+                                className="text-muted-foreground cursor-move hover:text-foreground mt-2"
+                              >
+                                ⋮⋮
+                              </div>
+
+                              <div className="flex-1 grid grid-cols-1 gap-3">
+                                <div>
+                                  <label className="block text-sm font-medium text-foreground mb-1">
+                                    Exercise
+                                  </label>
+                                  <select
+                                    value={log.exercise_id}
+                                    onChange={(e) => updateExerciseLog(log.tempId, 'exercise_id', e.target.value)}
+                                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                                    required
+                                  >
+                                    <option value="">Select exercise...</option>
+                                    {exercises.filter(e => {
+                                      const typeMapping: Record<WorkoutType, string[]> = {
+                                        'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
+                                        'Pull': ['Back', 'Biceps', 'Pull'],
+                                        'Legs': ['Legs']
+                                      }
+                                      const targetMuscles = typeMapping[workoutType] || []
+                                      const matches = targetMuscles.includes(e.muscle_group || '')
+                                      
+                                      return matches
+                                    }).reduce((acc, current) => {
+                                      // Remove duplicates by name
+                                      const existing = acc.find(item => item.name === current.name)
+                                      if (!existing) {
+                                        acc.push(current)
+                                      }
+                                      return acc
+                                    }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name)).map(exercise => (
+                                      <option key={exercise.id} value={exercise.id}>
+                                        {exercise.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div>
+                                    <label className="block text-xs font-medium text-foreground mb-1">
+                                      Sets
+                                      {log.last_sets && (
+                                        <span className="text-xs text-muted-foreground ml-1">
+                                          (Last: {log.last_sets})
+                                        </span>
+                                      )}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={log.sets || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
+                                        updateExerciseLog(log.tempId, 'sets', value)
+                                      }}
+                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
+                                      min="1"
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-foreground mb-1">
+                                      Reps
+                                      {log.last_reps && (
+                                        <span className="text-xs text-muted-foreground ml-1">
+                                          (Last: {log.last_reps})
+                                        </span>
+                                      )}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={log.reps || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
+                                        updateExerciseLog(log.tempId, 'reps', value)
+                                      }}
+                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
+                                      min="1"
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-foreground mb-1">
+                                      Weight (kg)
+                                      {log.last_weight && (
+                                        <span className="text-xs text-muted-foreground ml-1">
+                                          (Last: {log.last_weight}kg)
+                                        </span>
+                                      )}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={log.weight_kg || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value)
+                                        updateExerciseLog(log.tempId, 'weight_kg', value)
+                                      }}
+                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
+                                      min="0"
+                                      step="0.5"
+                                      required
+                                    />
+                                    {log.last_weight && log.weight_kg !== log.last_weight && (
+                                      <div className="text-xs mt-1">
+                                        {log.weight_kg > log.last_weight ? (
+                                          <span className="text-green-400">
+                                            +{(log.weight_kg - log.last_weight).toFixed(1)}kg from last time 💪
+                                          </span>
+                                        ) : log.weight_kg < log.last_weight ? (
+                                          <span className="text-orange-400">
+                                            -{(log.last_weight - log.weight_kg).toFixed(1)}kg from last time
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => removeExerciseLog(log.tempId)}
+                                className="text-destructive hover:text-destructive/80 font-bold text-lg"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          )}
         </div>
 
         {error && (
