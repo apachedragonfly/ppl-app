@@ -158,6 +158,15 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
         updated[index].weight_kg = lastValues.weight // Set as defaults
         updated[index].sets = lastValues.sets
         updated[index].reps = lastValues.reps
+      } else {
+        // Clear previous values if no history exists for this exercise
+        updated[index].last_weight = undefined
+        updated[index].last_sets = undefined
+        updated[index].last_reps = undefined
+        // Reset to sensible defaults
+        updated[index].weight_kg = 0
+        updated[index].sets = 3
+        updated[index].reps = 8
       }
     } else if (field === 'exercise_name') {
       updated[index].exercise_name = value as string
