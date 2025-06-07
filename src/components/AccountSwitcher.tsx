@@ -27,11 +27,17 @@ export default function AccountSwitcher() {
       setShowRegisterOption(false)
       setIsOpen(false)
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      if (error.message?.includes('Invalid login credentials') && !forceRegister) {
+      console.log('Login error:', error) // Debug log to see exact error
+      const errorMessage = error.message || error.toString()
+      
+      if ((errorMessage.includes('Invalid login credentials') || 
+           errorMessage.includes('invalid_credentials') ||
+           errorMessage.includes('Invalid') || 
+           error.name === 'AuthApiError') && !forceRegister) {
         setShowRegisterOption(true)
         setError('Account not found. Would you like to create a new account with these credentials?')
       } else {
-        setError(error.message || 'Failed to add account')
+        setError(errorMessage || 'Failed to add account')
       }
     } finally {
       setIsAdding(false)
