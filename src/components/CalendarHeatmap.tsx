@@ -243,7 +243,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           >
             {years.map(year => (
               <option key={year} value={year}>{year}</option>
@@ -253,7 +253,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedMonth ?? ''}
             onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           >
             <option value="">Full Year</option>
             {months.map((month, index) => (
@@ -264,7 +264,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedWorkoutType}
             onChange={(e) => setSelectedWorkoutType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           >
             <option value="all">All Types</option>
             <option value="Push">Push</option>

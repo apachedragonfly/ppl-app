@@ -86,7 +86,7 @@ export default function AccountSwitcher() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[280px] z-50">
+        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[280px] z-[100]">
           {/* Current account header */}
           <div className="p-3 border-b border-gray-100">
             <p className="text-xs text-gray-500 uppercase tracking-wider">Current Account</p>
@@ -240,7 +240,7 @@ export default function AccountSwitcher() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[90]"
           onClick={() => setIsOpen(false)}
         />
       )}
