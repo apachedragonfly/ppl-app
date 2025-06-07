@@ -79,8 +79,10 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       if (profileData) {
         setCurrentProfile(profileData)
       }
+      return profileData
     } catch (error) {
       console.error('Error loading profile:', error)
+      return null
     }
   }
 
@@ -127,6 +129,25 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const addAccount = async (email: string, password: string, shouldRegister = false) => {
     try {
       setIsLoading(true)
+      
+      // First, store the current account if it's not already stored
+      if (currentUser) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          const existingAccount = accounts.find(acc => acc.user.id === currentUser.id)
+          if (!existingAccount) {
+            const currentAccount = {
+              user: currentUser,
+              profile: currentProfile,
+              accessToken: session.access_token,
+              refreshToken: session.refresh_token
+            }
+            const updatedAccounts = [...accounts, currentAccount]
+            setAccounts(updatedAccounts)
+            saveAccountsToStorage(updatedAccounts)
+          }
+        }
+      }
       
       let data, error
       
