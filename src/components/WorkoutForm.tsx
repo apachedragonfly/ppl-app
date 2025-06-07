@@ -10,6 +10,9 @@ interface WorkoutLog {
   sets: number
   reps: number
   weight_kg: number
+  last_weight?: number // Last logged weight for this exercise
+  last_sets?: number // Last logged sets for this exercise
+  last_reps?: number // Last logged reps for this exercise
 }
 
 interface WorkoutFormProps {
@@ -30,7 +33,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
     loadRoutineFromStorage()
   }, [])
 
-  const loadRoutineFromStorage = () => {
+  const loadRoutineFromStorage = async () => {
     try {
       const storedRoutine = localStorage.getItem('selectedRoutine')
       if (storedRoutine) {
@@ -46,11 +49,71 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
           weight_kg: re.weight_kg || 0
         }))
         
-        setWorkoutLogs(logs)
+        // Fetch last logged weights for each exercise
+        await loadLastWeights(logs)
+        
         localStorage.removeItem('selectedRoutine') // Clear after loading
       }
     } catch (error) {
       console.error('Error loading routine from storage:', error)
+    }
+  }
+
+  const loadLastWeights = async (logs: WorkoutLog[]) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Fetch last logged weights for each exercise
+      const exerciseIds = logs.map(log => log.exercise_id).filter(Boolean)
+      if (exerciseIds.length === 0) return
+
+      const { data: lastWorkouts, error } = await supabase
+        .from('workout_logs')
+        .select(`
+          exercise_id,
+          weight_kg,
+          sets,
+          reps,
+          workout:workouts(date)
+        `)
+        .in('exercise_id', exerciseIds)
+        .eq('workout.user_id', user.id)
+        .order('workout(date)', { ascending: false })
+
+      if (error) throw error
+
+      // Group by exercise_id and get the most recent values for each
+      const lastValuesByExercise: Record<string, { weight: number, sets: number, reps: number }> = {}
+      lastWorkouts?.forEach((log: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        if (!lastValuesByExercise[log.exercise_id]) {
+          lastValuesByExercise[log.exercise_id] = {
+            weight: log.weight_kg,
+            sets: log.sets,
+            reps: log.reps
+          }
+        }
+      })
+
+      // Update logs with last values and set as defaults
+      const updatedLogs = logs.map(log => {
+        const lastValues = lastValuesByExercise[log.exercise_id]
+        return {
+          ...log,
+          last_weight: lastValues?.weight,
+          last_sets: lastValues?.sets,
+          last_reps: lastValues?.reps,
+          weight_kg: lastValues?.weight || log.weight_kg,
+          sets: lastValues?.sets || log.sets,
+          reps: lastValues?.reps || log.reps
+        }
+      })
+
+      setWorkoutLogs(updatedLogs)
+    } catch (error) {
+      console.error('Error loading last weights:', error)
+      // If error, just set the logs without last weights
+      setWorkoutLogs(logs)
     }
   }
 
@@ -79,12 +142,23 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
     }])
   }
 
-  const updateExerciseLog = (index: number, field: keyof WorkoutLog, value: string | number) => {
+  const updateExerciseLog = async (index: number, field: keyof WorkoutLog, value: string | number) => {
     const updated = [...workoutLogs]
     if (field === 'exercise_id') {
       const exercise = exercises.find(e => e.id === value)
       updated[index].exercise_id = value as string
       updated[index].exercise_name = exercise?.name || ''
+      
+      // Fetch last values for this exercise
+      const lastValues = await getLastValuesForExercise(value as string)
+      if (lastValues) {
+        updated[index].last_weight = lastValues.weight
+        updated[index].last_sets = lastValues.sets
+        updated[index].last_reps = lastValues.reps
+        updated[index].weight_kg = lastValues.weight // Set as defaults
+        updated[index].sets = lastValues.sets
+        updated[index].reps = lastValues.reps
+      }
     } else if (field === 'exercise_name') {
       updated[index].exercise_name = value as string
     } else if (field === 'sets') {
@@ -95,6 +169,39 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
       updated[index].weight_kg = value as number
     }
     setWorkoutLogs(updated)
+  }
+
+  const getLastValuesForExercise = async (exerciseId: string): Promise<{ weight: number, sets: number, reps: number } | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return null
+
+      const { data: lastWorkout, error } = await supabase
+        .from('workout_logs')
+        .select(`
+          weight_kg,
+          sets,
+          reps,
+          workout:workouts(date)
+        `)
+        .eq('exercise_id', exerciseId)
+        .eq('workout.user_id', user.id)
+        .order('workout(date)', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (error) throw error
+      if (!lastWorkout) return null
+      
+      return {
+        weight: lastWorkout.weight_kg,
+        sets: lastWorkout.sets,
+        reps: lastWorkout.reps
+      }
+    } catch (error) {
+      console.error('Error fetching last values:', error)
+      return null
+    }
   }
 
   const removeExerciseLog = (index: number) => {
@@ -246,11 +353,19 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Sets
+                      {log.last_sets && (
+                        <span className="text-xs text-gray-500 ml-1">
+                          (Last: {log.last_sets})
+                        </span>
+                      )}
                     </label>
                     <input
                       type="number"
-                      value={log.sets}
-                      onChange={(e) => updateExerciseLog(index, 'sets', parseInt(e.target.value))}
+                      value={log.sets || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
+                        updateExerciseLog(index, 'sets', value)
+                      }}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       min="1"
                       required
@@ -259,11 +374,19 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Reps
+                      {log.last_reps && (
+                        <span className="text-xs text-gray-500 ml-1">
+                          (Last: {log.last_reps})
+                        </span>
+                      )}
                     </label>
                     <input
                       type="number"
-                      value={log.reps}
-                      onChange={(e) => updateExerciseLog(index, 'reps', parseInt(e.target.value))}
+                      value={log.reps || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
+                        updateExerciseLog(index, 'reps', value)
+                      }}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       min="1"
                       required
@@ -272,16 +395,37 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Weight (kg)
+                      {log.last_weight && (
+                        <span className="text-xs text-gray-500 ml-1">
+                          (Last: {log.last_weight}kg)
+                        </span>
+                      )}
                     </label>
                     <input
                       type="number"
-                      value={log.weight_kg}
-                      onChange={(e) => updateExerciseLog(index, 'weight_kg', parseFloat(e.target.value))}
+                      value={log.weight_kg || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value)
+                        updateExerciseLog(index, 'weight_kg', value)
+                      }}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       min="0"
                       step="0.5"
                       required
                     />
+                    {log.last_weight && log.weight_kg !== log.last_weight && (
+                      <div className="text-xs mt-1">
+                        {log.weight_kg > log.last_weight ? (
+                          <span className="text-green-600">
+                            +{(log.weight_kg - log.last_weight).toFixed(1)}kg from last time 💪
+                          </span>
+                        ) : log.weight_kg < log.last_weight ? (
+                          <span className="text-orange-600">
+                            -{(log.last_weight - log.weight_kg).toFixed(1)}kg from last time
+                          </span>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 </div>
 
