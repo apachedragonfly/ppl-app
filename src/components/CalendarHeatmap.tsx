@@ -274,7 +274,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         </div>
       </div>
 
-      <div className="workout-heatmap" style={{ height: '220px', overflow: 'hidden' }}>
+      <div className="workout-heatmap" style={{ height: '200px', overflow: 'hidden' }}>
         <div ref={heatmapRef} style={{ height: '100%' }}>
           <CalendarHeatmap
             startDate={startDate}
@@ -442,25 +442,32 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
       )}
       
       <style jsx global>{`
-        /* GitHub-style workout heatmap */
+        /* GitHub-style workout heatmap - optimized spacing */
         .workout-heatmap .react-calendar-heatmap {
           width: 100%;
-          height: 220px;
-          max-height: 220px;
+          height: 200px;
+          max-height: 200px;
+          padding: 10px;
         }
 
         .workout-heatmap .react-calendar-heatmap svg {
           width: 100%;
-          height: 220px;
-          max-height: 220px;
+          height: 180px;
+          max-height: 180px;
         }
 
-        /* GitHub-style square tiles */
+        /* Add more space between squares */
+        .workout-heatmap .react-calendar-heatmap svg g > g {
+          transform: scale(0.85);
+          transform-origin: top left;
+        }
+
+        /* GitHub-style square tiles - optimized for bigger gaps */
         .workout-heatmap .react-calendar-heatmap rect {
-          width: 11px;
-          height: 11px;
-          rx: 2px;
-          ry: 2px;
+          width: 8px;
+          height: 8px;
+          rx: 1.5px;
+          ry: 1.5px;
           stroke: rgba(27, 31, 35, 0.06);
           stroke-width: 1px;
         }
