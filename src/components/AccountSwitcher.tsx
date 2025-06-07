@@ -240,7 +240,7 @@ export default function AccountSwitcher() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[90]"
           onClick={() => setIsOpen(false)}
         />
       )}
