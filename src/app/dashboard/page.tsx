@@ -40,7 +40,9 @@ export default function Dashboard() {
           <div className="bg-card rounded-lg shadow-lg p-4 sm:p-5 lg:p-6 mb-4 sm:mb-5 lg:mb-6 border border-border">
             <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
               <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <AccountSwitcher />
+                <div className="flex justify-center sm:justify-start">
+                  <AccountSwitcher />
+                </div>
                 <div className="text-center sm:text-left">
                   <h1 className="text-xl sm:text-xl lg:text-2xl font-bold text-foreground mb-1 sm:mb-2">
                     PPL Tracker Dashboard

@@ -125,33 +125,33 @@ export default function WorkoutHistoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center space-x-4">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center space-x-2 px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center space-x-2 px-3 py-2 text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors self-start"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               <span>Back to Dashboard</span>
             </button>
-            <h1 className="text-3xl font-bold text-foreground">Workout History</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Workout History</h1>
           </div>
           <button
             onClick={() => router.push('/workouts/new')}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            className="w-full sm:w-auto px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm sm:text-base"
           >
             Log New Workout
           </button>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full sm:w-auto px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm sm:text-base"
           >
             <option value="all">All Workouts</option>
             <option value="Push">Push</option>
@@ -168,11 +168,11 @@ export default function WorkoutHistoryPage() {
         ) : (
           <div className="space-y-4">
             {filteredWorkouts.map((workout) => (
-              <div key={workout.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start">
+              <div key={workout.id} className="bg-card border border-border rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:justify-between sm:items-start">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-card-foreground">
+                    <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3 mb-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-card-foreground">
                         {new Date(workout.date).toLocaleDateString('en-US', { 
                           weekday: 'long', 
                           year: 'numeric', 
@@ -180,7 +180,7 @@ export default function WorkoutHistoryPage() {
                           day: 'numeric' 
                         })}
                       </h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getTypeColor(workout.type)}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border self-start ${getTypeColor(workout.type)}`}>
                         {workout.type}
                       </span>
                     </div>
@@ -190,16 +190,16 @@ export default function WorkoutHistoryPage() {
                     </div>
                   </div>
 
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 w-full sm:w-auto">
                     <button
                       onClick={() => handleEditWorkout(workout.id)}
-                      className="px-3 py-1 bg-primary text-primary-foreground text-sm rounded-md hover:bg-primary/90 transition-colors"
+                      className="flex-1 sm:flex-none px-3 py-2 bg-primary text-primary-foreground text-sm rounded-md hover:bg-primary/90 transition-colors"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteWorkout(workout.id)}
-                      className="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+                      className="flex-1 sm:flex-none px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
                     >
                       Delete
                     </button>

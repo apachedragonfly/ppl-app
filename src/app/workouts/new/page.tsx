@@ -46,15 +46,15 @@ export default function NewWorkoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => router.back()}
-            className="text-primary hover:text-primary/80 font-medium mb-4"
+            className="text-primary hover:text-primary/80 font-medium mb-3 sm:mb-4 text-sm sm:text-base"
           >
             ← Back
           </button>
-          <h1 className="text-3xl font-bold text-foreground">New Workout</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">New Workout</h1>
         </div>
 
         <WorkoutForm onWorkoutSaved={handleWorkoutSaved} />
