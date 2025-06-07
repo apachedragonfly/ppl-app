@@ -274,7 +274,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         </div>
       </div>
 
-      <div className="workout-heatmap" style={{ height: '200px', overflow: 'hidden' }}>
+      <div className="workout-heatmap" style={{ height: '220px', overflow: 'hidden' }}>
         <div ref={heatmapRef} style={{ height: '100%' }}>
           <CalendarHeatmap
             startDate={startDate}
@@ -291,42 +291,61 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           />
         </div>
       </div>
-      <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
-        <div className="flex items-center space-x-4">
-          <span>Less</span>
+      <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+        <div className="flex items-center space-x-3">
+          <span className="text-xs">Less</span>
           <div className="flex space-x-1">
-            <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
+            {/* GitHub-style intensity scale */}
+            <div className="w-3 h-3 rounded-sm border border-border" 
+                 style={{ 
+                   backgroundColor: 'hsl(var(--muted) / 0.2)',
+                   outline: '1px solid hsl(var(--border))'
+                 }} 
+                 title="No workouts">
+            </div>
             {selectedWorkoutType === 'all' ? (
               <>
-                <div className="w-3 h-3 bg-red-300 rounded-sm" title="Push"></div>
-                <div className="w-3 h-3 bg-blue-300 rounded-sm" title="Pull"></div>
-                <div className="w-3 h-3 bg-green-300 rounded-sm" title="Legs"></div>
-                <div className="w-3 h-3 bg-purple-300 rounded-sm" title="Mixed"></div>
+                <div className="w-3 h-3 rounded-sm border" 
+                     style={{ backgroundColor: '#fecaca', borderColor: 'rgba(27, 31, 35, 0.06)' }} 
+                     title="Push (Light)">
+                </div>
+                <div className="w-3 h-3 rounded-sm border" 
+                     style={{ backgroundColor: '#bfdbfe', borderColor: 'rgba(27, 31, 35, 0.06)' }} 
+                     title="Pull (Light)">
+                </div>
+                <div className="w-3 h-3 rounded-sm border" 
+                     style={{ backgroundColor: '#bbf7d0', borderColor: 'rgba(27, 31, 35, 0.06)' }} 
+                     title="Legs (Light)">
+                </div>
+                <div className="w-3 h-3 rounded-sm border" 
+                     style={{ backgroundColor: '#ddd6fe', borderColor: 'rgba(27, 31, 35, 0.06)' }} 
+                     title="Mixed (Light)">
+                </div>
               </>
             ) : selectedWorkoutType === 'Push' ? (
               <>
-                <div className="w-3 h-3 bg-red-200 rounded-sm"></div>
-                <div className="w-3 h-3 bg-red-400 rounded-sm"></div>
-                <div className="w-3 h-3 bg-red-600 rounded-sm"></div>
-                <div className="w-3 h-3 bg-red-800 rounded-sm"></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#fecaca', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#f87171', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#dc2626', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#991b1b', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
               </>
             ) : selectedWorkoutType === 'Pull' ? (
               <>
-                <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
-                <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
-                <div className="w-3 h-3 bg-blue-600 rounded-sm"></div>
-                <div className="w-3 h-3 bg-blue-800 rounded-sm"></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#bfdbfe', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#60a5fa', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#2563eb', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#1d4ed8', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
               </>
             ) : selectedWorkoutType === 'Legs' ? (
               <>
-                <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
-                <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
-                <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-                <div className="w-3 h-3 bg-green-800 rounded-sm"></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#bbf7d0', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#4ade80', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#16a34a', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
+                <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: '#15803d', borderColor: 'rgba(27, 31, 35, 0.06)' }}></div>
               </>
             ) : null}
           </div>
-          <span>More</span>
+          <span className="text-xs">More</span>
         </div>
         
         {selectedWorkoutType === 'all' && (
@@ -374,25 +393,25 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
 
             <div className="space-y-4">
               {workoutDetails.map((workout, index) => (
-                <div key={workout.id} className="border border-gray-200 rounded-lg p-4">
+                <div key={workout.id} className="border border-border bg-secondary/20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      workout.type === 'Push' ? 'bg-red-100 text-red-800' :
-                      workout.type === 'Pull' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
+                      workout.type === 'Push' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' :
+                      workout.type === 'Pull' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200' :
+                      'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
                     }`}>
                       {workout.type}
                     </span>
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleEditWorkout(workout.id)}
-                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded hover:bg-primary/90 transition-colors"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteWorkout(workout.id)}
-                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                        className="px-2 py-1 bg-destructive text-destructive-foreground text-xs rounded hover:bg-destructive/90 transition-colors"
                       >
                         Delete
                       </button>
@@ -402,8 +421,8 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
                   <div className="space-y-2">
                     {workout.exercises.map((exercise, exerciseIndex) => (
                       <div key={exerciseIndex} className="flex justify-between items-center text-sm">
-                        <span className="font-medium text-gray-700">{exercise.name}</span>
-                        <span className="text-gray-600">
+                        <span className="font-medium text-card-foreground">{exercise.name}</span>
+                        <span className="text-muted-foreground">
                           {exercise.sets} × {exercise.reps} @ {exercise.weight_kg}kg
                         </span>
                       </div>
@@ -413,7 +432,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
               ))}
 
               {workoutDetails.length === 0 && (
-                <div className="text-center text-gray-500 py-4">
+                <div className="text-center text-muted-foreground py-4">
                   No workout details found for this date.
                 </div>
               )}
@@ -423,29 +442,45 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
       )}
       
       <style jsx global>{`
+        /* GitHub-style workout heatmap */
         .workout-heatmap .react-calendar-heatmap {
           width: 100%;
-          height: 200px;
-          max-height: 200px;
+          height: 220px;
+          max-height: 220px;
         }
 
         .workout-heatmap .react-calendar-heatmap svg {
           width: 100%;
-          height: 200px;
-          max-height: 200px;
+          height: 220px;
+          max-height: 220px;
         }
 
+        /* GitHub-style square tiles */
         .workout-heatmap .react-calendar-heatmap rect {
-          max-width: 15px;
-          max-height: 15px;
-          rx: 2;
+          width: 11px;
+          height: 11px;
+          rx: 2px;
+          ry: 2px;
+          stroke: rgba(27, 31, 35, 0.06);
+          stroke-width: 1px;
         }
         
+        /* Dark mode border adjustments */
+        html.dark .workout-heatmap .react-calendar-heatmap rect {
+          stroke: rgba(240, 246, 252, 0.1);
+        }
+        
+        /* Empty/No workout - GitHub style */
         .workout-heatmap .react-calendar-heatmap .color-empty {
           fill: #ebedf0;
         }
         
-        /* Push workout colors (Red) */
+        /* Dark mode empty squares */
+        html.dark .workout-heatmap .react-calendar-heatmap .color-empty {
+          fill: #161b22;
+        }
+        
+        /* Push workout colors (Red) - GitHub style intensity levels */
         .workout-heatmap .react-calendar-heatmap .color-push-1 {
           fill: #fecaca;
         }
@@ -459,7 +494,21 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: #991b1b;
         }
         
-        /* Pull workout colors (Blue) */
+        /* Dark mode Push colors */
+        html.dark .workout-heatmap .react-calendar-heatmap .color-push-1 {
+          fill: #450a0a;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-push-2 {
+          fill: #7f1d1d;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-push-3 {
+          fill: #dc2626;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-push-4 {
+          fill: #ef4444;
+        }
+        
+        /* Pull workout colors (Blue) - GitHub style intensity levels */
         .workout-heatmap .react-calendar-heatmap .color-pull-1 {
           fill: #bfdbfe;
         }
@@ -473,7 +522,21 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: #1d4ed8;
         }
         
-        /* Legs workout colors (Green) */
+        /* Dark mode Pull colors */
+        html.dark .workout-heatmap .react-calendar-heatmap .color-pull-1 {
+          fill: #1e3a8a;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-pull-2 {
+          fill: #1e40af;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-pull-3 {
+          fill: #2563eb;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-pull-4 {
+          fill: #3b82f6;
+        }
+        
+        /* Legs workout colors (Green) - GitHub style intensity levels */
         .workout-heatmap .react-calendar-heatmap .color-legs-1 {
           fill: #bbf7d0;
         }
@@ -487,7 +550,21 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: #15803d;
         }
         
-        /* Mixed workout colors (Purple) */
+        /* Dark mode Legs colors */
+        html.dark .workout-heatmap .react-calendar-heatmap .color-legs-1 {
+          fill: #14532d;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-legs-2 {
+          fill: #166534;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-legs-3 {
+          fill: #16a34a;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-legs-4 {
+          fill: #22c55e;
+        }
+        
+        /* Mixed workout colors (Purple) - GitHub style intensity levels */
         .workout-heatmap .react-calendar-heatmap .color-mixed-1 {
           fill: #ddd6fe;
         }
@@ -501,23 +578,40 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: #5b21b6;
         }
         
+        /* Dark mode Mixed colors */
+        html.dark .workout-heatmap .react-calendar-heatmap .color-mixed-1 {
+          fill: #581c87;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-mixed-2 {
+          fill: #6b21a8;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-mixed-3 {
+          fill: #7c3aed;
+        }
+        html.dark .workout-heatmap .react-calendar-heatmap .color-mixed-4 {
+          fill: #8b5cf6;
+        }
+        
+        /* GitHub-style text labels */
         .workout-heatmap .react-calendar-heatmap text {
-          font-size: 10px;
-          fill: #aaa;
+          font-size: 9px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+          fill: hsl(var(--muted-foreground));
         }
 
-        .workout-heatmap .react-calendar-heatmap [class*="color-push-"],
-        .workout-heatmap .react-calendar-heatmap [class*="color-pull-"],
-        .workout-heatmap .react-calendar-heatmap [class*="color-legs-"],
-        .workout-heatmap .react-calendar-heatmap [class*="color-mixed-"] {
+        /* Hover effects - GitHub style */
+        .workout-heatmap .react-calendar-heatmap [class*="color-"]:not(.color-empty) {
           cursor: pointer;
         }
 
-        .workout-heatmap .react-calendar-heatmap [class*="color-push-"]:hover,
-        .workout-heatmap .react-calendar-heatmap [class*="color-pull-"]:hover,
-        .workout-heatmap .react-calendar-heatmap [class*="color-legs-"]:hover,
-        .workout-heatmap .react-calendar-heatmap [class*="color-mixed-"]:hover {
-          opacity: 0.8;
+        .workout-heatmap .react-calendar-heatmap [class*="color-"]:not(.color-empty):hover {
+          stroke: rgba(27, 31, 35, 0.15) !important;
+          stroke-width: 1px;
+        }
+
+        /* Dark mode hover */
+        html.dark .workout-heatmap .react-calendar-heatmap [class*="color-"]:not(.color-empty):hover {
+          stroke: rgba(240, 246, 252, 0.3) !important;
         }
       `}</style>
     </div>
