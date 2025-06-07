@@ -37,15 +37,25 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
     try {
       const { data: exercises, error } = await supabase
         .from('exercises')
-        .select('id, name')
+        .select('id, name, user_id')
         .or(`user_id.eq.${userId},user_id.is.null`)
 
       if (error) throw error
 
-      setExercises(exercises || [])
+      // Deduplicate exercises by name, preferring user-specific ones
+      const exerciseMap = new Map()
+      exercises?.forEach(exercise => {
+        const existing = exerciseMap.get(exercise.name)
+        if (!existing || (!existing.user_id && exercise.user_id === userId)) {
+          exerciseMap.set(exercise.name, exercise)
+        }
+      })
+
+      const deduplicatedExercises = Array.from(exerciseMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+      setExercises(deduplicatedExercises)
       
-      if (!selectedExercise && exercises && exercises.length > 0) {
-        setSelectedExercise(exercises[0].id)
+      if (!selectedExercise && deduplicatedExercises && deduplicatedExercises.length > 0) {
+        setSelectedExercise(deduplicatedExercises[0].id)
       }
     } catch (error) {
       console.error('Error fetching exercises:', error)

@@ -119,13 +119,26 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
   const loadExercises = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
+        .or(`user_id.eq.${user?.id},user_id.is.null`)
         .order('name')
 
       if (error) throw error
-      setExercises(data || [])
+
+      // Deduplicate exercises by name, preferring user-specific ones
+      const exerciseMap = new Map()
+      data?.forEach(exercise => {
+        const existing = exerciseMap.get(exercise.name)
+        if (!existing || (!existing.user_id && exercise.user_id === user?.id)) {
+          exerciseMap.set(exercise.name, exercise)
+        }
+      })
+
+      const deduplicatedExercises = Array.from(exerciseMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+      setExercises(deduplicatedExercises)
     } catch (error) {
       console.error('Error loading exercises:', error)
       setError('Failed to load exercises')
@@ -367,12 +380,19 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                     <option value="">Select exercise...</option>
                     {exercises.filter(e => {
                       const typeMapping: Record<WorkoutType, string[]> = {
-                        'Push': ['Chest', 'Shoulders', 'Triceps'],
-                        'Pull': ['Back', 'Biceps'],
+                        'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
+                        'Pull': ['Back', 'Biceps', 'Pull'],
                         'Legs': ['Legs']
                       }
                       const targetMuscles = typeMapping[workoutType] || []
-                      return targetMuscles.includes(e.muscle_group || '')
+                      const matches = targetMuscles.includes(e.muscle_group || '')
+                      
+                      // Debug logging
+                      if (e.name.toLowerCase().includes('bench') || e.name.toLowerCase().includes('squat') || e.name.toLowerCase().includes('row')) {
+                        console.log(`Exercise: ${e.name}, Muscle Group: ${e.muscle_group}, Workout Type: ${workoutType}, Target Muscles: ${targetMuscles.join(', ')}, Matches: ${matches}`)
+                      }
+                      
+                      return matches
                     }).reduce((acc, current) => {
                       // Remove duplicates by name
                       const existing = acc.find(item => item.name === current.name)
