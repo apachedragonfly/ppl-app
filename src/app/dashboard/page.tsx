@@ -58,14 +58,14 @@ export default function Dashboard() {
         </div>
 
         {/* Visual Tracking Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Workout Heatmap */}
-          <div className="bg-card rounded-lg shadow-lg border border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Workout Heatmap - Wider */}
+          <div className="lg:col-span-3 bg-card rounded-lg shadow-lg border border-border">
             <WorkoutHeatmap userId={currentUser.id} />
           </div>
 
-          {/* Progress Chart */}
-          <div className="bg-card rounded-lg shadow-lg border border-border">
+          {/* Progress Chart - Narrower */}
+          <div className="lg:col-span-2 bg-card rounded-lg shadow-lg border border-border">
             <ChartProgress userId={currentUser.id} />
           </div>
         </div>

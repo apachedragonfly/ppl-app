@@ -122,6 +122,33 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
 
   const selectedExerciseName = exercises.find(ex => ex.id === selectedExercise)?.name || 'Exercise'
 
+  // Custom tooltip component for dark mode support
+  const CustomTooltip = ({ active, payload, label }: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+          <p className="text-card-foreground font-medium">
+            {`Date: ${formatDate(label as string)}`}
+          </p>
+          {payload.map((entry: any, index: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+            <p key={index} className="text-card-foreground">
+              <span className="font-medium">
+                {entry.dataKey === 'maxWeight' ? 'Max Weight' : '1RM'}:
+              </span>
+              <span className="ml-1" style={{ color: entry.color }}>
+                {entry.dataKey === 'max1RM' 
+                  ? `${Math.round(entry.value)} kg`
+                  : `${entry.value} kg`
+                }
+              </span>
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  }
+
   if (loading) {
     return (
       <div className={`p-4 ${className}`}>
@@ -196,22 +223,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'weight' ? (
             <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
                 angle={-45}
                 textAnchor="end"
                 height={60}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
               />
-              <YAxis />
-              <Tooltip 
-                labelFormatter={(value) => `Date: ${formatDate(value as string)}`}
-                formatter={(value, name) => [
-                  `${value} kg`,
-                  name === 'maxWeight' ? 'Max Weight' : 'Weight'
-                ]}
-              />
+              <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+              <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
                 dataKey="maxWeight" 
@@ -223,22 +245,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
             </LineChart>
           ) : (
             <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
                 angle={-45}
                 textAnchor="end"
                 height={60}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
               />
-              <YAxis />
-              <Tooltip 
-                labelFormatter={(value) => `Date: ${formatDate(value as string)}`}
-                formatter={(value, name) => [
-                  `${Math.round(value as number)} kg`,
-                  name === 'max1RM' ? '1RM' : '1RM'
-                ]}
-              />
+              <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+              <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
                 dataKey="max1RM" 
