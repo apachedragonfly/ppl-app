@@ -354,7 +354,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
       {/* Workout Details Modal */}
       {showModal && selectedDate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-lg font-semibold text-gray-900">
                 Workouts for {new Date(selectedDate).toLocaleDateString('en-US', { 

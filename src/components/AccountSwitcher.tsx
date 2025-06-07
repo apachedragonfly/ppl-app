@@ -61,14 +61,14 @@ export default function AccountSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="flex items-center space-x-3 p-2 rounded-lg hover:bg-secondary transition-colors"
       >
         {/* Current user avatar */}
         {currentProfile?.avatar_url ? (
           <img
             src={currentProfile.avatar_url}
             alt="Profile"
-            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+            className="w-8 h-8 rounded-full object-cover border border-border"
           />
         ) : (
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
@@ -77,25 +77,25 @@ export default function AccountSwitcher() {
         )}
         
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-foreground">
             {getDisplayName(currentProfile, currentUser.email || '')}
           </span>
-          <IoChevronDownOutline className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <IoChevronDownOutline className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[280px] z-50">
+        <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-lg min-w-[280px] z-50">
           {/* Current account header */}
-          <div className="p-3 border-b border-gray-100">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Current Account</p>
+          <div className="p-3 border-b border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Current Account</p>
             <div className="flex items-center space-x-3 mt-2">
               {currentProfile?.avatar_url ? (
                 <img
                   src={currentProfile.avatar_url}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                  className="w-10 h-10 rounded-full object-cover border border-border"
                 />
               ) : (
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium">
@@ -103,16 +103,16 @@ export default function AccountSwitcher() {
                 </div>
               )}
               <div>
-                <p className="font-medium text-gray-900">{getDisplayName(currentProfile, currentUser.email || '')}</p>
-                <p className="text-sm text-gray-500">{currentUser.email}</p>
+                <p className="font-medium text-card-foreground">{getDisplayName(currentProfile, currentUser.email || '')}</p>
+                <p className="text-sm text-muted-foreground">{currentUser.email}</p>
               </div>
             </div>
           </div>
 
           {/* Other accounts */}
           {accounts.filter(acc => acc.user.id !== currentUser.id).length > 0 && (
-            <div className="p-3 border-b border-gray-100">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Switch To</p>
+            <div className="p-3 border-b border-border">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Switch To</p>
               {accounts.filter(acc => acc.user.id !== currentUser.id).map((account) => (
                 <div key={account.user.id} className="flex items-center justify-between group">
                   <button
@@ -120,13 +120,13 @@ export default function AccountSwitcher() {
                       switchToAccount(account.user.id)
                       setIsOpen(false)
                     }}
-                    className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors flex-1"
+                    className="flex items-center space-x-3 p-2 rounded-md hover:bg-secondary transition-colors flex-1"
                   >
                     {account.profile?.avatar_url ? (
                       <img
                         src={account.profile.avatar_url}
                         alt="Profile"
-                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        className="w-8 h-8 rounded-full object-cover border border-border"
                       />
                     ) : (
                       <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
@@ -134,13 +134,13 @@ export default function AccountSwitcher() {
                       </div>
                     )}
                     <div className="text-left">
-                      <p className="text-sm font-medium text-gray-900">{getDisplayName(account.profile, account.user.email || '')}</p>
-                      <p className="text-xs text-gray-500">{account.user.email}</p>
+                      <p className="text-sm font-medium text-card-foreground">{getDisplayName(account.profile, account.user.email || '')}</p>
+                      <p className="text-xs text-muted-foreground">{account.user.email}</p>
                     </div>
                   </button>
                   <button
                     onClick={() => removeAccount(account.user.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                    className="p-1 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
                   >
                     <IoCloseOutline className="h-4 w-4" />
                   </button>
@@ -154,7 +154,7 @@ export default function AccountSwitcher() {
             {!showAddForm ? (
               <button
                 onClick={() => setShowAddForm(true)}
-                className="flex items-center space-x-2 w-full p-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                className="flex items-center space-x-2 w-full p-2 text-left text-sm text-foreground hover:bg-secondary rounded-md transition-colors"
               >
                 <IoPersonAddOutline className="h-4 w-4" />
                 <span>Add another account</span>
@@ -167,7 +167,7 @@ export default function AccountSwitcher() {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring placeholder-muted-foreground"
                     required
                   />
                 </div>
@@ -177,12 +177,12 @@ export default function AccountSwitcher() {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring placeholder-muted-foreground"
                     required
                   />
                 </div>
                 {error && (
-                  <p className="text-xs text-red-600">{error}</p>
+                  <p className="text-xs text-destructive">{error}</p>
                 )}
                 <div className="flex flex-col space-y-2">
                   {showRegisterOption ? (
@@ -201,7 +201,7 @@ export default function AccountSwitcher() {
                           setShowRegisterOption(false)
                           setError('')
                         }}
-                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                        className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                       >
                         Back
                       </button>
@@ -211,7 +211,7 @@ export default function AccountSwitcher() {
                       <button
                         type="submit"
                         disabled={isAdding}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-md transition-colors disabled:opacity-50"
+                        className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm px-3 py-2 rounded-md transition-colors disabled:opacity-50"
                       >
                         {isAdding ? 'Adding...' : 'Add Account'}
                       </button>
@@ -224,7 +224,7 @@ export default function AccountSwitcher() {
                           setEmail('')
                           setPassword('')
                         }}
-                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                        className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                       >
                         Cancel
                       </button>

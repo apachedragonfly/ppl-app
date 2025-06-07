@@ -213,14 +213,14 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
 
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+          <div className="max-w-2xl mx-auto p-6 bg-card border border-border rounded-lg shadow-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-foreground">
           {routine ? 'Edit Routine' : 'Create New Routine'}
         </h2>
         <button
           onClick={onCancel}
-          className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+          className="text-muted-foreground hover:text-foreground text-xl font-bold"
         >
           ×
         </button>
@@ -229,27 +229,27 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
       <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Routine Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="My Push Routine"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Type
             </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as WorkoutType)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="Push">Push</option>
               <option value="Pull">Pull</option>
@@ -260,19 +260,19 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Exercises</h3>
+            <h3 className="text-lg font-semibold text-foreground">Exercises</h3>
             <button
               type="button"
               onClick={addExercise}
               disabled={getFilteredExercises().length === 0}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               Add Exercise
             </button>
           </div>
 
           {exercises.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               No exercises added yet. Click &quot;Add Exercise&quot; to get started.
             </div>
           ) : (
@@ -286,14 +286,14 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`p-4 border border-gray-200 rounded-lg ${
-                              snapshot.isDragging ? 'shadow-lg bg-blue-50' : 'bg-gray-50'
+                            className={`p-4 border border-border rounded-lg ${
+                              snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary'
                             }`}
                           >
                             <div className="flex items-center space-x-4">
                               <div
                                 {...provided.dragHandleProps}
-                                className="text-gray-400 cursor-move hover:text-gray-600"
+                                className="text-muted-foreground cursor-move hover:text-foreground"
                               >
                                 ⋮⋮
                               </div>
@@ -303,7 +303,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
                                   <select
                                     value={exercise.exercise_id}
                                     onChange={(e) => updateExercise(exercise.tempId, 'exercise_id', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                                   >
                                     <option value="">Select exercise...</option>
                                     {getFilteredExercises().map((ex) => (
@@ -317,7 +317,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
                                     type="number"
                                     value={exercise.sets}
                                     onChange={(e) => updateExercise(exercise.tempId, 'sets', parseInt(e.target.value))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                                     placeholder="Sets"
                                     min="1"
                                     required
@@ -329,7 +329,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
                                     type="number"
                                     value={exercise.reps}
                                     onChange={(e) => updateExercise(exercise.tempId, 'reps', parseInt(e.target.value))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                                     placeholder="Reps"
                                     min="1"
                                     required
@@ -340,7 +340,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
                               <button
                                 type="button"
                                 onClick={() => removeExercise(exercise.tempId)}
-                                className="text-red-500 hover:text-red-700 font-bold text-lg"
+                                className="text-destructive hover:text-destructive/80 font-bold text-lg"
                               >
                                 ×
                               </button>
@@ -361,14 +361,14 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 border border-border text-foreground rounded-md hover:bg-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving || !name.trim() || exercises.length === 0}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {saving ? 'Saving...' : 'Save Routine'}
           </button>

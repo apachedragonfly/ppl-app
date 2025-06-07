@@ -69,7 +69,7 @@ export default function WorkoutCard({ workout, onDeleted }: WorkoutCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+    <div className="bg-card rounded-lg shadow p-4 border border-border">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(workout.type)}`}>

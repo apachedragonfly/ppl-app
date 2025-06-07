@@ -317,32 +317,32 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Log Workout</h2>
+          <div className="bg-card border border-border rounded-lg shadow-lg p-6">
+      <h2 className="text-xl font-bold text-foreground mb-4">Log Workout</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Date
             </label>
             <input
               type="date"
               value={workoutDate}
               onChange={(e) => setWorkoutDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Type
             </label>
             <select
               value={workoutType}
               onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring"
               required
             >
               <option value="Push">Push</option>
@@ -354,27 +354,27 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Exercises</h3>
+            <h3 className="text-lg font-medium text-foreground">Exercises</h3>
             <button
               type="button"
               onClick={addExerciseLog}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-1 px-3 rounded-md transition-colors"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium py-1 px-3 rounded-md transition-colors"
             >
               + Add Exercise
             </button>
           </div>
 
           {workoutLogs.map((log, index) => (
-            <div key={index} className="bg-gray-50 p-4 rounded-lg">
+            <div key={index} className="bg-secondary p-4 rounded-lg border border-border">
               <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Exercise
                   </label>
                   <select
                     value={log.exercise_id}
                     onChange={(e) => updateExerciseLog(index, 'exercise_id', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
                     required
                   >
                     <option value="">Select exercise...</option>
@@ -410,10 +410,10 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-foreground mb-1">
                       Sets
                       {log.last_sets && (
-                        <span className="text-xs text-gray-500 ml-1">
+                        <span className="text-xs text-muted-foreground ml-1">
                           (Last: {log.last_sets})
                         </span>
                       )}
@@ -425,16 +425,16 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                         const value = e.target.value === '' ? 1 : parseInt(e.target.value)
                         updateExerciseLog(index, 'sets', value)
                       }}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
                       min="1"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-foreground mb-1">
                       Reps
                       {log.last_reps && (
-                        <span className="text-xs text-gray-500 ml-1">
+                        <span className="text-xs text-muted-foreground ml-1">
                           (Last: {log.last_reps})
                         </span>
                       )}
@@ -446,16 +446,16 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                         const value = e.target.value === '' ? 1 : parseInt(e.target.value)
                         updateExerciseLog(index, 'reps', value)
                       }}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
                       min="1"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-foreground mb-1">
                       Weight (kg)
                       {log.last_weight && (
-                        <span className="text-xs text-gray-500 ml-1">
+                        <span className="text-xs text-muted-foreground ml-1">
                           (Last: {log.last_weight}kg)
                         </span>
                       )}
@@ -467,7 +467,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                         const value = e.target.value === '' ? 0 : parseFloat(e.target.value)
                         updateExerciseLog(index, 'weight_kg', value)
                       }}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
                       min="0"
                       step="0.5"
                       required
@@ -475,11 +475,11 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                     {log.last_weight && log.weight_kg !== log.last_weight && (
                       <div className="text-xs mt-1">
                         {log.weight_kg > log.last_weight ? (
-                          <span className="text-green-600">
+                          <span className="text-green-400">
                             +{(log.weight_kg - log.last_weight).toFixed(1)}kg from last time 💪
                           </span>
                         ) : log.weight_kg < log.last_weight ? (
-                          <span className="text-orange-600">
+                          <span className="text-orange-400">
                             -{(log.last_weight - log.weight_kg).toFixed(1)}kg from last time
                           </span>
                         ) : null}
@@ -491,7 +491,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                 <button
                   type="button"
                   onClick={() => removeExerciseLog(index)}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium self-start"
+                  className="text-destructive hover:text-destructive/80 text-sm font-medium self-start"
                 >
                   Remove Exercise
                 </button>
@@ -501,17 +501,17 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm">{error}</div>
+          <div className="text-destructive text-sm">{error}</div>
         )}
 
         {message && (
-          <div className="text-green-600 text-sm">{message}</div>
+          <div className="text-green-400 text-sm">{message}</div>
         )}
 
         <button
           type="submit"
           disabled={loading || workoutLogs.length === 0}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save Workout'}
         </button>
