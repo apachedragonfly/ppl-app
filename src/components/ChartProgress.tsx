@@ -161,15 +161,15 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
   }
 
   return (
-    <div className={`p-4 ${className}`}>
-      <div className="flex flex-col space-y-4 mb-6">
-        <h3 className="text-lg font-semibold text-foreground">Progress Chart</h3>
+    <div className={`p-3 sm:p-4 ${className}`}>
+      <div className="flex flex-col space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground">Progress Chart</h3>
         
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+        <div className="flex flex-col space-y-2">
           <select
             value={selectedExercise}
             onChange={(e) => setSelectedExercise(e.target.value)}
-            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm sm:text-base"
             disabled={exercises.length === 0}
           >
             {exercises.length === 0 ? (
@@ -186,7 +186,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
           <div className="flex space-x-2">
             <button
               onClick={() => setChartType('weight')}
-              className={`px-4 py-2 rounded-md transition-colors ${
+              className={`px-3 py-2 text-sm rounded-md transition-colors flex-1 ${
                 chartType === 'weight'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -197,7 +197,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
             </button>
             <button
               onClick={() => setChartType('1rm')}
-              className={`px-4 py-2 rounded-md transition-colors ${
+              className={`px-3 py-2 text-sm rounded-md transition-colors flex-1 ${
                 chartType === '1rm'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -219,20 +219,20 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         </div>
       ) : (
         <>
-          <div className="h-64">
+          <div className="h-48 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'weight' ? (
-            <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={progressData} margin={{ top: 5, right: 15, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
                 angle={-45}
                 textAnchor="end"
-                height={60}
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                height={50}
+                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               />
-              <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
@@ -244,17 +244,17 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
               />
             </LineChart>
           ) : (
-            <LineChart data={progressData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={progressData} margin={{ top: 5, right: 15, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
                 angle={-45}
                 textAnchor="end"
-                height={60}
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                height={50}
+                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               />
-              <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
@@ -269,7 +269,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         </ResponsiveContainer>
       </div>
 
-          <div className="mt-4 text-sm text-muted-foreground">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
             <p>
               <strong>{selectedExerciseName}</strong> - {
                 chartType === 'weight' 

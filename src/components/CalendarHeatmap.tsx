@@ -235,15 +235,15 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
 
   return (
-    <div className={`p-4 ${className}`}>
-      <div className="flex flex-col space-y-4 mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Workout Activity</h3>
+    <div className={`p-3 sm:p-4 ${className}`}>
+      <div className="flex flex-col space-y-3 sm:space-y-4 mb-3 sm:mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground">Workout Activity</h3>
         
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm sm:text-base"
           >
             {years.map(year => (
               <option key={year} value={year}>{year}</option>
@@ -253,7 +253,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedMonth ?? ''}
             onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
-            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm sm:text-base"
           >
             <option value="">Full Year</option>
             {months.map((month, index) => (
@@ -264,7 +264,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedWorkoutType}
             onChange={(e) => setSelectedWorkoutType(e.target.value)}
-            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm sm:text-base"
           >
             <option value="all">All Types</option>
             <option value="Push">Push</option>
@@ -274,8 +274,8 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         </div>
       </div>
 
-      <div className="workout-heatmap" style={{ height: '200px', overflow: 'hidden' }}>
-        <div ref={heatmapRef} style={{ height: '100%' }}>
+      <div className="workout-heatmap w-full" style={{ height: '160px' }}>
+        <div ref={heatmapRef} style={{ height: '100%', width: '100%' }}>
           <CalendarHeatmap
             startDate={startDate}
             endDate={endDate}
