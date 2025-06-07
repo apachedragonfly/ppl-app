@@ -246,57 +246,57 @@ export default function EditWorkoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   if (!user || !workout) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg text-gray-600">Workout not found</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-lg text-muted-foreground">Workout not found</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-800 font-medium mb-4"
+            className="text-primary hover:text-primary/80 font-medium mb-4"
           >
             ← Back
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Workout</h1>
+          <h1 className="text-3xl font-bold text-foreground">Edit Workout</h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-card border border-border rounded-lg shadow p-6">
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-card-foreground mb-1">
                   Date
                 </label>
                 <input
                   type="date"
                   value={workout.date}
                   onChange={(e) => setWorkout({ ...workout, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-card-foreground mb-1">
                   Type
                 </label>
                 <select
                   value={workout.type}
                   onChange={(e) => setWorkout({ ...workout, type: e.target.value as WorkoutType })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   required
                 >
                   <option value="Push">Push</option>
@@ -308,27 +308,27 @@ export default function EditWorkoutPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">Exercises</h3>
+                <h3 className="text-lg font-medium text-card-foreground">Exercises</h3>
                 <button
                   type="button"
                   onClick={addExerciseLog}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-1 px-3 rounded-md transition-colors"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium py-1 px-3 rounded-md transition-colors"
                 >
                   + Add Exercise
                 </button>
               </div>
 
               {workout.workout_logs.map((log, index) => (
-                <div key={log.id} className="bg-gray-50 p-4 rounded-lg">
+                <div key={log.id} className="bg-secondary/20 border border-border p-4 rounded-lg">
                   <div className="grid grid-cols-1 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-card-foreground mb-1">
                         Exercise
                       </label>
                       <select
                         value={log.exercise_id}
                         onChange={(e) => updateWorkoutLog(index, 'exercise_id', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm"
                         required
                       >
                         <option value="">Select exercise...</option>
@@ -342,40 +342,40 @@ export default function EditWorkoutPage() {
 
                     <div className="grid grid-cols-3 gap-2">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-card-foreground mb-1">
                           Sets
                         </label>
                         <input
                           type="number"
                           value={log.sets}
                           onChange={(e) => updateWorkoutLog(index, 'sets', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                           min="1"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-card-foreground mb-1">
                           Reps
                         </label>
                         <input
                           type="number"
                           value={log.reps}
                           onChange={(e) => updateWorkoutLog(index, 'reps', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                           min="1"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-card-foreground mb-1">
                           Weight (kg)
                         </label>
                         <input
                           type="number"
                           value={log.weight_kg}
                           onChange={(e) => updateWorkoutLog(index, 'weight_kg', parseFloat(e.target.value))}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                          className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                           min="0"
                           step="0.5"
                           required
@@ -386,7 +386,7 @@ export default function EditWorkoutPage() {
                     <button
                       type="button"
                       onClick={() => removeExerciseLog(index)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium self-start"
+                      className="text-destructive hover:text-destructive/80 text-sm font-medium self-start"
                     >
                       Remove Exercise
                     </button>
@@ -396,7 +396,7 @@ export default function EditWorkoutPage() {
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm">{error}</div>
+              <div className="text-destructive text-sm">{error}</div>
             )}
 
             {message && (
@@ -407,14 +407,14 @@ export default function EditWorkoutPage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-border text-foreground rounded-md hover:bg-secondary/80 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving || workout.workout_logs.length === 0}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 transition-colors"
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 {saving ? 'Updating...' : 'Update Workout'}
               </button>

@@ -136,13 +136,13 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
   return (
     <div className={`p-4 ${className}`}>
       <div className="flex flex-col space-y-4 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Progress Chart</h3>
+        <h3 className="text-lg font-semibold text-foreground">Progress Chart</h3>
         
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <select
             value={selectedExercise}
             onChange={(e) => setSelectedExercise(e.target.value)}
-            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             disabled={exercises.length === 0}
           >
             {exercises.length === 0 ? (
@@ -161,8 +161,8 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
               onClick={() => setChartType('weight')}
               className={`px-4 py-2 rounded-md transition-colors ${
                 chartType === 'weight'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
               }`}
               disabled={!progressData.length}
             >
@@ -172,8 +172,8 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
               onClick={() => setChartType('1rm')}
               className={`px-4 py-2 rounded-md transition-colors ${
                 chartType === '1rm'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
               }`}
               disabled={!progressData.length}
             >
@@ -184,7 +184,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
       </div>
 
       {!progressData.length ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           {exercises.length === 0 
             ? "No exercises available. Start logging workouts to see your progress!"
             : "No workout data for this exercise. Start logging workouts to see your progress!"
@@ -252,7 +252,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
         </ResponsiveContainer>
       </div>
 
-          <div className="mt-4 text-sm text-gray-600">
+          <div className="mt-4 text-sm text-muted-foreground">
             <p>
               <strong>{selectedExerciseName}</strong> - {
                 chartType === 'weight' 

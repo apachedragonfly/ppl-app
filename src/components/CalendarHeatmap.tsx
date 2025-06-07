@@ -237,13 +237,13 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
   return (
     <div className={`p-4 ${className}`}>
       <div className="flex flex-col space-y-4 mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Workout Activity</h3>
+        <h3 className="text-lg font-semibold text-foreground">Workout Activity</h3>
         
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {years.map(year => (
               <option key={year} value={year}>{year}</option>
@@ -253,7 +253,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedMonth ?? ''}
             onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
-            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">Full Year</option>
             {months.map((month, index) => (
@@ -264,7 +264,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <select
             value={selectedWorkoutType}
             onChange={(e) => setSelectedWorkoutType(e.target.value)}
-            className="appearance-none bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="appearance-none bg-input border border-border text-foreground px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Types</option>
             <option value="Push">Push</option>
@@ -291,7 +291,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           />
         </div>
       </div>
-      <div className="flex items-center justify-between mt-3 text-sm text-gray-600">
+      <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
         <div className="flex items-center space-x-4">
           <span>Less</span>
           <div className="flex space-x-1">
@@ -356,7 +356,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
           <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h4 className="text-lg font-semibold text-gray-900">
+              <h4 className="text-lg font-semibold text-card-foreground">
                 Workouts for {new Date(selectedDate).toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   year: 'numeric', 
@@ -366,7 +366,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
               </h4>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                className="text-muted-foreground hover:text-foreground text-xl font-bold"
               >
                 ×
               </button>
