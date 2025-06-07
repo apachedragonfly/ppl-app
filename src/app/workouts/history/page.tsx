@@ -102,10 +102,10 @@ export default function WorkoutHistoryPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'Push': return 'bg-red-100 text-red-800'
-      case 'Pull': return 'bg-blue-100 text-blue-800'
-      case 'Legs': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'Push': return 'bg-red-500/20 text-red-300 border-red-500/30'
+      case 'Pull': return 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+      case 'Legs': return 'bg-green-500/20 text-green-300 border-green-500/30'
+      default: return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -115,8 +115,8 @@ export default function WorkoutHistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -124,24 +124,24 @@ export default function WorkoutHistoryPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               <span>Back to Dashboard</span>
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Workout History</h1>
+            <h1 className="text-3xl font-bold text-foreground">Workout History</h1>
           </div>
           <button
             onClick={() => router.push('/workouts/new')}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
           >
             Log New Workout
           </button>
@@ -151,7 +151,7 @@ export default function WorkoutHistoryPage() {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Workouts</option>
             <option value="Push">Push</option>
@@ -162,17 +162,17 @@ export default function WorkoutHistoryPage() {
 
         {filteredWorkouts.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-500 text-lg mb-4">No workouts found</div>
-            <p className="text-gray-400">Start logging your workouts to see them here!</p>
+            <div className="text-muted-foreground text-lg mb-4">No workouts found</div>
+            <p className="text-muted-foreground/70">Start logging your workouts to see them here!</p>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredWorkouts.map((workout) => (
-              <div key={workout.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div key={workout.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-card-foreground">
                         {new Date(workout.date).toLocaleDateString('en-US', { 
                           weekday: 'long', 
                           year: 'numeric', 
@@ -180,11 +180,11 @@ export default function WorkoutHistoryPage() {
                           day: 'numeric' 
                         })}
                       </h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(workout.type)}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getTypeColor(workout.type)}`}>
                         {workout.type}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600 space-y-1">
+                    <div className="text-sm text-muted-foreground space-y-1">
                       <p>{workout.exercises_count} exercise{workout.exercises_count !== 1 ? 's' : ''}</p>
                       <p>{workout.total_sets} total sets</p>
                     </div>
@@ -193,7 +193,7 @@ export default function WorkoutHistoryPage() {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleEditWorkout(workout.id)}
-                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                      className="px-3 py-1 bg-primary text-primary-foreground text-sm rounded-md hover:bg-primary/90 transition-colors"
                     >
                       Edit
                     </button>

@@ -161,21 +161,21 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading profile...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-lg text-foreground">Loading profile...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-card border border-border rounded-lg shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+            <h1 className="text-2xl font-bold text-foreground">Profile</h1>
             <button
               onClick={handleBack}
-              className="text-indigo-600 hover:text-indigo-500 text-sm font-medium"
+              className="text-primary hover:text-primary/80 text-sm font-medium"
             >
               ← Back to Dashboard
             </button>
@@ -187,16 +187,16 @@ export default function ProfilePage() {
                 <img
                   src={avatarUrl}
                   alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-border"
                 />
               ) : (
-                <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center border-4 border-gray-200">
-                  <span className="text-2xl text-gray-600">👤</span>
+                <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center border-4 border-border">
+                  <span className="text-2xl text-muted-foreground">👤</span>
                 </div>
               )}
               <label
                 htmlFor="avatar-upload"
-                className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 cursor-pointer transition-colors"
+                className="absolute bottom-0 right-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-2 cursor-pointer transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -212,17 +212,17 @@ export default function ProfilePage() {
                 className="hidden"
               />
             </div>
-            <p className="text-lg font-medium text-gray-900 mb-1">
+            <p className="text-lg font-medium text-card-foreground mb-1">
               {name || 'Set your name'}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {user?.email}
             </p>
           </div>
 
           <form onSubmit={handleSave} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
                 Name
               </label>
               <input
@@ -230,13 +230,13 @@ export default function ProfilePage() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring placeholder-muted-foreground"
                 placeholder="Enter your name"
               />
             </div>
 
             <div>
-              <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="height" className="block text-sm font-medium text-foreground mb-1">
                 Height (cm)
               </label>
               <input
@@ -244,13 +244,13 @@ export default function ProfilePage() {
                 id="height"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring placeholder-muted-foreground"
                 placeholder="e.g. 175"
               />
             </div>
 
             <div>
-              <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="weight" className="block text-sm font-medium text-foreground mb-1">
                 Weight (kg)
               </label>
               <input
@@ -258,13 +258,13 @@ export default function ProfilePage() {
                 id="weight"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring placeholder-muted-foreground"
                 placeholder="e.g. 70"
               />
             </div>
 
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="age" className="block text-sm font-medium text-foreground mb-1">
                 Age
               </label>
               <input
@@ -272,23 +272,23 @@ export default function ProfilePage() {
                 id="age"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring placeholder-muted-foreground"
                 placeholder="e.g. 25"
               />
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+              <div className="text-destructive text-sm text-center">{error}</div>
             )}
 
             {message && (
-              <div className="text-green-600 text-sm text-center">{message}</div>
+              <div className="text-green-400 text-sm text-center">{message}</div>
             )}
 
             <button
               type="submit"
               disabled={saving || uploading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
             >
               {uploading ? 'Uploading...' : saving ? 'Saving...' : 'Save Profile'}
             </button>

@@ -24,13 +24,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <AccountProvider>
           {children}
         </AccountProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Set theme before page loads to prevent flash
+              (function() {
+                const theme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.className = theme;
+              })();
+            `,
+          }}
+        />
       </body>
     </html>
   );

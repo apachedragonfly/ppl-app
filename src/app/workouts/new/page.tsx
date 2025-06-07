@@ -36,8 +36,8 @@ export default function NewWorkoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -45,16 +45,16 @@ export default function NewWorkoutPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-800 font-medium mb-4"
+            className="text-primary hover:text-primary/80 font-medium mb-4"
           >
             ← Back
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">New Workout</h1>
+          <h1 className="text-3xl font-bold text-foreground">New Workout</h1>
         </div>
 
         <WorkoutForm onWorkoutSaved={handleWorkoutSaved} />
