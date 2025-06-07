@@ -49,6 +49,8 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
           weight_kg: re.weight_kg || 0
         }))
         
+        console.log('Loading routine with logs:', logs)
+        
         // Fetch last logged weights for each exercise
         await loadLastWeights(logs)
         
@@ -64,40 +66,38 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Fetch last logged weights for each exercise
+      // Fetch exercises with last workout data for this user
       const exerciseIds = logs.map(log => log.exercise_id).filter(Boolean)
       if (exerciseIds.length === 0) return
 
-      const { data: lastWorkouts, error } = await supabase
-        .from('workout_logs')
-        .select(`
-          exercise_id,
-          weight_kg,
-          sets,
-          reps,
-          workout:workouts(date)
-        `)
-        .in('exercise_id', exerciseIds)
-        .eq('workout.user_id', user.id)
-        .order('workout(date)', { ascending: false })
+      const { data: exercisesWithLastData, error } = await supabase
+        .from('exercises')
+        .select('id, last_weight_kg, last_sets, last_reps')
+        .in('id', exerciseIds)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching exercise data (columns might not exist yet):', error)
+        // If columns don't exist, just continue without last data
+        setWorkoutLogs(logs)
+        return
+      }
 
-      // Group by exercise_id and get the most recent values for each
-      const lastValuesByExercise: Record<string, { weight: number, sets: number, reps: number }> = {}
-      lastWorkouts?.forEach((log: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-        if (!lastValuesByExercise[log.exercise_id]) {
-          lastValuesByExercise[log.exercise_id] = {
-            weight: log.weight_kg,
-            sets: log.sets,
-            reps: log.reps
-          }
+      console.log('Fetched exercise data:', exercisesWithLastData)
+
+      // Create lookup map
+      const exerciseDataMap: Record<string, { weight?: number, sets?: number, reps?: number }> = {}
+      exercisesWithLastData?.forEach(exercise => {
+        exerciseDataMap[exercise.id] = {
+          weight: exercise.last_weight_kg,
+          sets: exercise.last_sets,
+          reps: exercise.last_reps
         }
       })
 
       // Update logs with last values and set as defaults
       const updatedLogs = logs.map(log => {
-        const lastValues = lastValuesByExercise[log.exercise_id]
+        const lastValues = exerciseDataMap[log.exercise_id]
+        console.log(`Exercise ${log.exercise_name} - Last values:`, lastValues)
         return {
           ...log,
           last_weight: lastValues?.weight,
@@ -173,34 +173,61 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
   const getLastValuesForExercise = async (exerciseId: string): Promise<{ weight: number, sets: number, reps: number } | null> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
-
-      const { data: lastWorkout, error } = await supabase
-        .from('workout_logs')
-        .select(`
-          weight_kg,
-          sets,
-          reps,
-          workout:workouts(date)
-        `)
-        .eq('exercise_id', exerciseId)
-        .eq('workout.user_id', user.id)
-        .order('workout(date)', { ascending: false })
-        .limit(1)
+      const { data: exercise, error } = await supabase
+        .from('exercises')
+        .select('last_weight_kg, last_sets, last_reps')
+        .eq('id', exerciseId)
         .maybeSingle()
 
-      if (error) throw error
-      if (!lastWorkout) return null
+      console.log('Fetched individual exercise data:', exercise)
+
+      if (error) {
+        console.error('Error fetching individual exercise (columns might not exist yet):', error)
+        return null
+      }
+      if (!exercise || (!exercise.last_weight_kg && !exercise.last_sets && !exercise.last_reps)) {
+        console.log('No last workout data found for exercise')
+        return null
+      }
       
       return {
-        weight: lastWorkout.weight_kg,
-        sets: lastWorkout.sets,
-        reps: lastWorkout.reps
+        weight: exercise.last_weight_kg || 0,
+        sets: exercise.last_sets || 3,
+        reps: exercise.last_reps || 10
       }
     } catch (error) {
       console.error('Error fetching last values:', error)
       return null
+    }
+  }
+
+  const updateExerciseLastValues = async (logs: WorkoutLog[], date: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Update each exercise with the latest workout data
+      for (const log of logs) {
+        const { error: updateError } = await supabase
+          .from('exercises')
+          .update({
+            last_weight_kg: log.weight_kg,
+            last_sets: log.sets,
+            last_reps: log.reps,
+            last_workout_date: date,
+            user_id: user.id // Associate with current user
+          })
+          .eq('id', log.exercise_id)
+          
+        if (updateError) {
+          console.error(`Error updating exercise ${log.exercise_name}:`, updateError)
+        } else {
+          console.log(`Updated ${log.exercise_name} with last values: ${log.sets}x${log.reps} @ ${log.weight_kg}kg`)
+        }
+      }
+    } catch (error) {
+      console.error('Error updating exercise last values:', error)
+      // Don't throw - workout was already saved successfully
     }
   }
 
@@ -250,6 +277,9 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
         .insert(logs)
 
       if (logsError) throw logsError
+
+      // Update last workout data on exercises
+      await updateExerciseLastValues(workoutLogs, workoutDate)
 
       setMessage('Workout saved successfully!')
       setWorkoutLogs([])
