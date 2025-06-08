@@ -86,7 +86,7 @@ export default function AccountSwitcher() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-lg min-w-[280px] z-50">
+        <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-lg min-w-[280px] z-[100]">
           {/* Current account header */}
           <div className="p-3 border-b border-border">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Current Account</p>
