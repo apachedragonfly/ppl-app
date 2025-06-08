@@ -94,8 +94,8 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
           }
         }
 
-        // Calculate 1RM for this set: 1RM = Weight x (1 + 0.0333 x Reps)
-        const oneRM = log.weight_kg * (1 + 0.0333 * log.reps)
+        // Calculate 1RM for this set: 1RM = Weight x (1 + (Reps / 30))
+        const oneRM = log.weight_kg * (1 + (log.reps / 30))
         
         dataByDate[date].maxWeight = Math.max(dataByDate[date].maxWeight, log.weight_kg)
         dataByDate[date].max1RM = Math.max(dataByDate[date].max1RM, oneRM)
@@ -274,7 +274,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
               <strong>{selectedExerciseName}</strong> - {
                 chartType === 'weight' 
                   ? 'Highest weight lifted per workout session'
-                  : 'Estimated 1 Rep Max using formula: Weight × (1 + 0.0333 × Reps)'
+                  : 'Estimated 1 Rep Max using formula: Weight × (1 + (Reps / 30))'
               }
             </p>
           </div>
