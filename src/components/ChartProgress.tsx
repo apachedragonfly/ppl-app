@@ -274,7 +274,7 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
               <strong>{selectedExerciseName}</strong> - {
                 chartType === 'weight' 
                   ? 'Highest weight lifted per workout session'
-                  : 'Estimated 1 Rep Max using formula: Weight × (1 + (Reps ÷ 30))'
+                  : 'Estimated 1 Rep Max using formula: Weight × (1 + (Reps / 30))'
               }
             </p>
           </div>

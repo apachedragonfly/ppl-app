@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [weight, setWeight] = useState('')
   const [age, setAge] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [showEmail, setShowEmail] = useState(false)
 
   useEffect(() => {
     const getUser = async () => {
@@ -120,6 +121,16 @@ export default function ProfilePage() {
     router.push('/dashboard')
   }
 
+  const maskEmail = (email: string) => {
+    if (!email) return ''
+    const [localPart, domain] = email.split('@')
+    if (!domain) return email
+    
+    // Show first 2 characters, then asterisks, then @domain
+    const maskedLocal = localPart.substring(0, 2) + '*'.repeat(Math.max(localPart.length - 2, 3))
+    return `${maskedLocal}@${domain}`
+  }
+
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true)
@@ -215,9 +226,13 @@ export default function ProfilePage() {
             <p className="text-lg font-medium text-card-foreground mb-1">
               {name || 'Set your name'}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {user?.email}
-            </p>
+            <button
+              onClick={() => setShowEmail(!showEmail)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              title={showEmail ? 'Click to hide email' : 'Click to reveal email'}
+            >
+              {showEmail ? user?.email : maskEmail(user?.email || '')}
+            </button>
           </div>
 
           <form onSubmit={handleSave} className="space-y-4">
