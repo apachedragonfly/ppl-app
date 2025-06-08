@@ -606,6 +606,11 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           fill: hsl(var(--muted-foreground));
         }
 
+        /* Dark mode text labels - white text */
+        html.dark .workout-heatmap .react-calendar-heatmap text {
+          fill: white;
+        }
+
         /* Hover effects - GitHub style */
         .workout-heatmap .react-calendar-heatmap [class*="color-"]:not(.color-empty) {
           cursor: pointer;
