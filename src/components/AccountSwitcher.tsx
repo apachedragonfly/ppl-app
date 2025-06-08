@@ -104,7 +104,6 @@ export default function AccountSwitcher() {
               )}
               <div>
                 <p className="font-medium text-card-foreground">{getDisplayName(currentProfile, currentUser.email || '')}</p>
-                <p className="text-sm text-muted-foreground">{currentUser.email}</p>
               </div>
             </div>
           </div>
@@ -135,7 +134,6 @@ export default function AccountSwitcher() {
                     )}
                     <div className="text-left">
                       <p className="text-sm font-medium text-card-foreground">{getDisplayName(account.profile, account.user.email || '')}</p>
-                      <p className="text-xs text-muted-foreground">{account.user.email}</p>
                     </div>
                   </button>
                   <button
