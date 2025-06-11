@@ -230,9 +230,9 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                 angle={-45}
                 textAnchor="end"
                 height={50}
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 10, fill: 'white' }}
               />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis tick={{ fontSize: 10, fill: 'white' }} />
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
@@ -252,9 +252,9 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                 angle={-45}
                 textAnchor="end"
                 height={50}
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 10, fill: 'white' }}
               />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis tick={{ fontSize: 10, fill: 'white' }} />
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
