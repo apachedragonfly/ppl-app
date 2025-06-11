@@ -22,9 +22,36 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
   const [selectedExercise, setSelectedExercise] = useState<string>(exerciseId || '')
   const [chartType, setChartType] = useState<'weight' | '1rm'>('weight')
   const [loading, setLoading] = useState(true)
+  const [axisColor, setAxisColor] = useState('#000000')
+
+  // Function to get axis color based on theme
+  const getAxisColor = () => {
+    if (typeof window !== 'undefined') {
+      const isDark = document.documentElement.classList.contains('dark')
+      return isDark ? '#ffffff' : '#000000'
+    }
+    return '#000000'
+  }
 
   useEffect(() => {
     fetchExercises()
+    
+    // Set initial axis color
+    setAxisColor(getAxisColor())
+    
+    // Listen for theme changes
+    const observer = new MutationObserver(() => {
+      setAxisColor(getAxisColor())
+    })
+    
+    if (typeof window !== 'undefined') {
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      })
+    }
+    
+    return () => observer.disconnect()
   }, [userId])
 
   useEffect(() => {
@@ -230,9 +257,9 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                 angle={-45}
                 textAnchor="end"
                 height={50}
-                tick={{ fontSize: 10, fill: 'white' }}
+                tick={{ fontSize: 10, fill: axisColor }}
               />
-              <YAxis tick={{ fontSize: 10, fill: 'white' }} />
+              <YAxis tick={{ fontSize: 10, fill: axisColor }} />
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
@@ -252,9 +279,9 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
                 angle={-45}
                 textAnchor="end"
                 height={50}
-                tick={{ fontSize: 10, fill: 'white' }}
+                tick={{ fontSize: 10, fill: axisColor }}
               />
-              <YAxis tick={{ fontSize: 10, fill: 'white' }} />
+              <YAxis tick={{ fontSize: 10, fill: axisColor }} />
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
