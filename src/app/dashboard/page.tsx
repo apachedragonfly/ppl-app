@@ -8,6 +8,7 @@ import ChartProgress from '@/components/ChartProgress'
 import GradientMenu from '@/components/GradientMenu'
 import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import NextWorkoutBanner from '@/components/NextWorkoutBanner'
 
 export default function Dashboard() {
   const { currentUser, currentProfile, isLoading } = useAccount()
@@ -59,7 +60,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-                  {/* Visual Tracking Components */}
+          {/* Next Workout Banner */}
+          <NextWorkoutBanner userId={currentUser.id} />
+
+          {/* Visual Tracking Components */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
             {/* Workout Heatmap - Wider */}
             <div className="lg:col-span-3 bg-card rounded-lg shadow-lg border border-border order-1">
@@ -71,7 +75,7 @@ export default function Dashboard() {
               <ChartProgress userId={currentUser.id} />
             </div>
           </div>
+        </div>
       </div>
-    </div>
-  )
+    )
 } 
