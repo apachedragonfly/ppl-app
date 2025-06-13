@@ -33,13 +33,13 @@ export default function WorkoutHistoryPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/auth/login')
+        router.push('/login')
         return
       }
       setUser(user)
     } catch (error) {
       console.error('Error checking user:', error)
-      router.push('/auth/login')
+      router.push('/login')
     } finally {
       setLoading(false)
     }
