@@ -274,6 +274,38 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
     setWorkoutLogs(workoutLogs.filter(log => log.tempId !== tempId))
   }
 
+  const createNewExercise = async (name: string, muscleGroup: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('exercises')
+        .insert([{
+          name,
+          muscle_group: muscleGroup,
+          user_id: user.id
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Add to local exercises list
+      setExercises(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
+      
+      setMessage(`Created new exercise: ${name}`)
+      setTimeout(() => setMessage(''), 3000)
+
+      return data
+    } catch (error) {
+      console.error('Error creating exercise:', error)
+      setError('Failed to create exercise')
+      setTimeout(() => setError(''), 3000)
+      return null
+    }
+  }
+
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return
 
@@ -443,6 +475,12 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                                       return acc
                                     }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name))}
                                     onSelectExercise={(exercise) => updateExerciseLog(log.tempId, 'exercise_id', exercise.id)}
+                                    onCreateExercise={async (name, muscleGroup) => {
+                                      const newExercise = await createNewExercise(name, muscleGroup)
+                                      if (newExercise) {
+                                        updateExerciseLog(log.tempId, 'exercise_id', newExercise.id)
+                                      }
+                                    }}
                                     placeholder="Search exercises..."
                                   />
                                   {log.exercise_id && (
