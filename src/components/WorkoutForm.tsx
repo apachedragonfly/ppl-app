@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase'
 import { Exercise, WorkoutType } from '@/types'
+import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 
 interface WorkoutLog {
   tempId: string
@@ -125,7 +126,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('exercises')
-        .select('*')
+        .select('id, user_id, name, muscle_group, created_at, video, description, muscles_worked')
         .or(`user_id.eq.${user?.id},user_id.is.null`)
         .order('name')
 
@@ -452,6 +453,21 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                                     ))}
                                   </select>
                                 </div>
+
+                                {/* Exercise Info Card */}
+                                {log.exercise_id && (() => {
+                                  const selectedExercise = exercises.find(e => e.id === log.exercise_id);
+                                  return selectedExercise?.video && (
+                                    <div className="mt-3">
+                                      <ExerciseInfoCard
+                                        exerciseName={selectedExercise.name}
+                                        video={selectedExercise.video}
+                                        description={selectedExercise.description}
+                                        musclesWorked={(selectedExercise as any).muscles_worked}
+                                      />
+                                    </div>
+                                  );
+                                })()}
 
                                 <div className="grid grid-cols-3 gap-2">
                                   <div>
