@@ -37,13 +37,14 @@ export default function GradientMenu() {
       gradientTo: '#a855f7',
       action: () => router.push('/workouts/new')
     },
-    { 
-      title: 'Templates', 
-      icon: <IoDocumentTextOutline />, 
-      gradientFrom: '#3b82f6', 
-      gradientTo: '#1d4ed8',
-      action: () => router.push('/templates')
-    },
+    // Templates - Hidden for now (uncomment when ready to enable)
+    // { 
+    //   title: 'Templates', 
+    //   icon: <IoDocumentTextOutline />, 
+    //   gradientFrom: '#3b82f6', 
+    //   gradientTo: '#1d4ed8',
+    //   action: () => router.push('/templates')
+    // },
     { 
       title: 'Routines', 
       icon: <IoBookOutline />, 

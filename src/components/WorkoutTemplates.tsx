@@ -53,18 +53,30 @@ export default function WorkoutTemplates({ onStartWorkout }: WorkoutTemplatesPro
         .or(`user_id.eq.${user?.id},is_public.eq.true`)
         .order('created_at', { ascending: false })
 
-      if (templatesError) throw templatesError
-
       // Load quick-start routines
       const { data: routinesData, error: routinesError } = await supabase
         .from('quick_start_routines')
         .select('*')
         .order('is_featured', { ascending: false })
 
-      if (routinesError) throw routinesError
+      // Handle case where tables don't exist yet
+      if (templatesError && templatesError.code === '42P01') {
+        console.warn('Templates tables not found - please run the add_workout_templates.sql migration')
+        setTemplates([])
+      } else if (templatesError) {
+        throw templatesError
+      } else {
+        setTemplates(templatesData || [])
+      }
 
-      setTemplates(templatesData || [])
-      setQuickStartRoutines(routinesData || [])
+      if (routinesError && routinesError.code === '42P01') {
+        console.warn('Quick-start routines table not found - please run the add_workout_templates.sql migration')
+        setQuickStartRoutines([])
+      } else if (routinesError) {
+        throw routinesError
+      } else {
+        setQuickStartRoutines(routinesData || [])
+      }
     } catch (error) {
       console.error('Error loading templates:', error)
       setError('Failed to load workout templates')
@@ -236,7 +248,7 @@ export default function WorkoutTemplates({ onStartWorkout }: WorkoutTemplatesPro
   const getFilteredQuickStart = () => {
     return quickStartRoutines.filter(routine => {
       const typeMatch = filterType === 'all' || routine.workout_type === filterType
-      const difficultyMatch = filterDifficulty === 'all' || routine.difficulty_level === difficultyMatch
+      const difficultyMatch = filterDifficulty === 'all' || routine.difficulty_level === filterDifficulty
       return typeMatch && difficultyMatch
     })
   }
