@@ -7,6 +7,7 @@ import ExerciseSearch from '@/components/ExerciseSearch'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import BulkExerciseImport from '@/components/BulkExerciseImport'
 import ExerciseStats from '@/components/ExerciseStats'
+import ExerciseHistory from '@/components/ExerciseHistory'
 import { mergeExerciseMetadata } from '@/lib/mergeExerciseMetadata'
 
 interface ExerciseFormData {
@@ -27,6 +28,8 @@ export default function ExercisesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showBulkImport, setShowBulkImport] = useState(false)
   const [showStats, setShowStats] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [selectedExerciseForHistory, setSelectedExerciseForHistory] = useState<Exercise | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   
@@ -347,6 +350,11 @@ export default function ExercisesPage() {
     }
   }
 
+  const handleShowHistory = (exercise: Exercise) => {
+    setSelectedExerciseForHistory(exercise)
+    setShowHistory(true)
+  }
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -582,6 +590,18 @@ export default function ExercisesPage() {
           </div>
         )}
 
+        {/* Exercise History Modal */}
+        {showHistory && selectedExerciseForHistory && (
+          <ExerciseHistory
+            exercise={selectedExerciseForHistory}
+            userId={currentUserId}
+            onClose={() => {
+              setShowHistory(false)
+              setSelectedExerciseForHistory(null)
+            }}
+          />
+        )}
+
         {/* Bulk Import Modal */}
         {showBulkImport && (
           <BulkExerciseImport
@@ -761,6 +781,13 @@ export default function ExercisesPage() {
                     title={exercise.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                   >
                     {exercise.is_favorite ? '⭐' : '☆'}
+                  </button>
+                  <button
+                    onClick={() => handleShowHistory(exercise)}
+                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 text-sm"
+                    title="View exercise history"
+                  >
+                    📊
                   </button>
                   <button
                     onClick={() => handleEditExercise(exercise)}
