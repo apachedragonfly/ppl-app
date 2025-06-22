@@ -79,8 +79,8 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
   // Filter exercises by workout type and remove duplicates
   const getFilteredExercises = () => {
     const typeMapping: Record<WorkoutType, string[]> = {
-      'Push': ['Chest', 'Shoulders', 'Triceps'],
-      'Pull': ['Back', 'Biceps'],
+      'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
+      'Pull': ['Back', 'Biceps', 'Pull'],
       'Legs': ['Legs']
     }
     
