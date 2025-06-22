@@ -18,8 +18,8 @@ export default function ExerciseInfoCard({
   const videoId = video?.url ? getYouTubeId(video.url) : null
 
   return (
-    <div className="bg-card rounded-lg shadow-lg border border-border p-4 space-y-4">
-      <h3 className="text-lg font-semibold text-foreground">{exerciseName}</h3>
+    <div className="bg-card rounded-lg shadow-lg border border-border p-3 sm:p-4 space-y-3 sm:space-y-4">
+      <h3 className="text-base sm:text-lg font-semibold text-foreground break-words">{exerciseName}</h3>
       
       {videoId && (
         <div className="w-full aspect-video">
@@ -34,12 +34,12 @@ export default function ExerciseInfoCard({
       )}
       
       {!video?.url && (
-        <div className="text-sm">
+        <div className="text-xs sm:text-sm">
           <a
             href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exerciseName + " exercise")}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 underline hover:text-blue-600 transition-colors"
+            className="text-blue-500 underline hover:text-blue-600 transition-colors break-words"
           >
             Search YouTube for "{exerciseName}"
           </a>
@@ -47,29 +47,30 @@ export default function ExerciseInfoCard({
       )}
       
       {description && description.trim() && (
-        <p className="text-base text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{description}</p>
       )}
       
       {musclesWorked && (musclesWorked.primary?.length > 0 || (musclesWorked.secondary && musclesWorked.secondary.length > 0)) && (
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           {musclesWorked.primary && musclesWorked.primary.length > 0 && (
-            <div className="text-sm">
+            <div className="text-xs sm:text-sm">
               <span className="font-medium text-foreground">Primary muscles:</span>{' '}
-              <span className="text-muted-foreground">{musclesWorked.primary.join(', ')}</span>
+              <span className="text-muted-foreground break-words">{musclesWorked.primary.join(', ')}</span>
             </div>
           )}
           {musclesWorked.secondary && musclesWorked.secondary.length > 0 && (
-            <div className="text-sm">
+            <div className="text-xs sm:text-sm">
               <span className="font-medium text-foreground">Secondary muscles:</span>{' '}
-              <span className="text-muted-foreground">{musclesWorked.secondary.join(', ')}</span>
+              <span className="text-muted-foreground break-words">{musclesWorked.secondary.join(', ')}</span>
             </div>
           )}
         </div>
       )}
       
       {video?.title && video.title.trim() && (
-        <div className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Video:</span> {video.title}
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Video:</span>{' '}
+          <span className="break-words">{video.title}</span>
           {video.author && video.author.trim() && <span> by {video.author}</span>}
         </div>
       )}
