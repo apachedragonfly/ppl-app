@@ -79,12 +79,18 @@ export default function Dashboard() {
           </div>
 
           {/* TEST: ExerciseInfoCard - Remove when tasks complete */}
-          <div className="mt-6">
+          <div className="mt-6 space-y-4">
             <ExerciseInfoCard
               exerciseName={mockExerciseData[0].name}
               video={mockExerciseData[0].video}
               description={mockExerciseData[0].description}
               musclesWorked={mockExerciseData[0].musclesWorked}
+            />
+            
+            {/* Test with missing fields */}
+            <ExerciseInfoCard
+              exerciseName="Test Exercise (No Data)"
+              // No video, description, or musclesWorked
             />
           </div>
         </div>

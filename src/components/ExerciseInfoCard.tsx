@@ -33,13 +33,13 @@ export default function ExerciseInfoCard({
         </div>
       )}
       
-      {description && (
+      {description && description.trim() && (
         <p className="text-base text-muted-foreground leading-relaxed">{description}</p>
       )}
       
-      {musclesWorked && (
+      {musclesWorked && (musclesWorked.primary?.length > 0 || (musclesWorked.secondary && musclesWorked.secondary.length > 0)) && (
         <div className="space-y-2">
-          {musclesWorked.primary.length > 0 && (
+          {musclesWorked.primary && musclesWorked.primary.length > 0 && (
             <div className="text-sm">
               <span className="font-medium text-foreground">Primary muscles:</span>{' '}
               <span className="text-muted-foreground">{musclesWorked.primary.join(', ')}</span>
@@ -54,10 +54,10 @@ export default function ExerciseInfoCard({
         </div>
       )}
       
-      {video?.title && (
+      {video?.title && video.title.trim() && (
         <div className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Video:</span> {video.title}
-          {video.author && <span> by {video.author}</span>}
+          {video.author && video.author.trim() && <span> by {video.author}</span>}
         </div>
       )}
     </div>
