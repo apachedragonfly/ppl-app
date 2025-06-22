@@ -9,6 +9,7 @@ import BulkExerciseImport from '@/components/BulkExerciseImport'
 import ExerciseStats from '@/components/ExerciseStats'
 import ExerciseHistory from '@/components/ExerciseHistory'
 import ExerciseNotes from '@/components/ExerciseNotes'
+import ExerciseComparison from '@/components/ExerciseComparison'
 import { mergeExerciseMetadata } from '@/lib/mergeExerciseMetadata'
 
 interface ExerciseFormData {
@@ -33,6 +34,9 @@ export default function ExercisesPage() {
   const [selectedExerciseForHistory, setSelectedExerciseForHistory] = useState<Exercise | null>(null)
   const [showNotes, setShowNotes] = useState(false)
   const [selectedExerciseForNotes, setSelectedExerciseForNotes] = useState<Exercise | null>(null)
+  const [showComparison, setShowComparison] = useState(false)
+  const [selectedExercisesForComparison, setSelectedExercisesForComparison] = useState<Exercise[]>([])
+  const [comparisonMode, setComparisonMode] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   
@@ -363,6 +367,28 @@ export default function ExercisesPage() {
     setShowNotes(true)
   }
 
+  const toggleComparisonMode = () => {
+    setComparisonMode(!comparisonMode)
+    setSelectedExercisesForComparison([])
+  }
+
+  const toggleExerciseSelection = (exercise: Exercise) => {
+    setSelectedExercisesForComparison(prev => {
+      const isSelected = prev.some(e => e.id === exercise.id)
+      if (isSelected) {
+        return prev.filter(e => e.id !== exercise.id)
+      } else {
+        return [...prev, exercise]
+      }
+    })
+  }
+
+  const handleStartComparison = () => {
+    if (selectedExercisesForComparison.length >= 2) {
+      setShowComparison(true)
+    }
+  }
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -407,6 +433,16 @@ export default function ExercisesPage() {
               Bulk Import
             </button>
             <button
+              onClick={toggleComparisonMode}
+              className={`font-medium py-2 px-4 rounded-md transition-colors ${
+                comparisonMode 
+                  ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                  : 'bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 dark:hover:bg-orange-900/30'
+              }`}
+            >
+              {comparisonMode ? 'Exit Compare' : '📊 Compare'}
+            </button>
+            <button
               onClick={() => setShowCreateForm(true)}
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
             >
@@ -414,6 +450,43 @@ export default function ExercisesPage() {
             </button>
           </div>
         </div>
+
+        {/* Comparison Mode Bar */}
+        {comparisonMode && (
+          <div className="mb-6 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-orange-800 dark:text-orange-400">
+                  Compare Mode: Select exercises to compare
+                </h3>
+                <p className="text-sm text-orange-600 dark:text-orange-500">
+                  Selected: {selectedExercisesForComparison.length} exercises
+                  {selectedExercisesForComparison.length > 0 && (
+                    <span className="ml-2">
+                      ({selectedExercisesForComparison.map(e => e.name).join(', ')})
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setSelectedExercisesForComparison([])}
+                  className="px-3 py-1 text-sm text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300"
+                  disabled={selectedExercisesForComparison.length === 0}
+                >
+                  Clear Selection
+                </button>
+                <button
+                  onClick={handleStartComparison}
+                  disabled={selectedExercisesForComparison.length < 2}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Compare Selected ({selectedExercisesForComparison.length})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Search and Filter */}
         <div className="mb-6">
@@ -623,6 +696,19 @@ export default function ExercisesPage() {
           />
         )}
 
+        {/* Exercise Comparison Modal */}
+        {showComparison && selectedExercisesForComparison.length >= 2 && (
+          <ExerciseComparison
+            exercises={selectedExercisesForComparison}
+            userId={currentUserId}
+            onClose={() => {
+              setShowComparison(false)
+              setComparisonMode(false)
+              setSelectedExercisesForComparison([])
+            }}
+          />
+        )}
+
         {/* Bulk Import Modal */}
         {showBulkImport && (
           <BulkExerciseImport
@@ -767,12 +853,31 @@ export default function ExercisesPage() {
 
         {/* Exercise List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getFilteredAndSortedExercises().map(exercise => (
-            <div key={exercise.id} className="bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <h3 className="font-semibold text-foreground">{exercise.name}</h3>
+          {getFilteredAndSortedExercises().map(exercise => {
+            const isSelected = selectedExercisesForComparison.some(e => e.id === exercise.id)
+            return (
+              <div 
+                key={exercise.id} 
+                className={`bg-card border rounded-lg p-4 shadow-sm hover:shadow-md transition-all ${
+                  comparisonMode 
+                    ? (isSelected ? 'border-orange-500 ring-2 ring-orange-200 dark:ring-orange-800' : 'border-border cursor-pointer hover:border-orange-300')
+                    : 'border-border'
+                }`}
+                onClick={comparisonMode ? () => toggleExerciseSelection(exercise) : undefined}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      {comparisonMode && (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleExerciseSelection(exercise)}
+                          className="rounded border-border text-orange-600 focus:ring-orange-500"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
+                      <h3 className="font-semibold text-foreground">{exercise.name}</h3>
                     {exercise.video?.url && (
                       <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
                         📹 Video
@@ -796,45 +901,47 @@ export default function ExercisesPage() {
                     </p>
                   )}
                 </div>
-                <div className="flex space-x-2 ml-3">
-                  <button
-                    onClick={() => handleToggleFavorite(exercise)}
-                    className={`text-sm font-medium transition-colors ${
-                      exercise.is_favorite
-                        ? 'text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300'
-                        : 'text-gray-400 hover:text-yellow-600 dark:text-gray-500 dark:hover:text-yellow-400'
-                    }`}
-                    title={exercise.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    {exercise.is_favorite ? '⭐' : '☆'}
-                  </button>
-                  <button
-                    onClick={() => handleShowHistory(exercise)}
-                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 text-sm"
-                    title="View exercise history"
-                  >
-                    📊
-                  </button>
-                  <button
-                    onClick={() => handleShowNotes(exercise)}
-                    className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
-                    title="Notes & Personal Records"
-                  >
-                    📝
-                  </button>
-                  <button
-                    onClick={() => handleEditExercise(exercise)}
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteExercise(exercise)}
-                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {!comparisonMode && (
+                  <div className="flex space-x-2 ml-3">
+                    <button
+                      onClick={() => handleToggleFavorite(exercise)}
+                      className={`text-sm font-medium transition-colors ${
+                        exercise.is_favorite
+                          ? 'text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300'
+                          : 'text-gray-400 hover:text-yellow-600 dark:text-gray-500 dark:hover:text-yellow-400'
+                      }`}
+                      title={exercise.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      {exercise.is_favorite ? '⭐' : '☆'}
+                    </button>
+                    <button
+                      onClick={() => handleShowHistory(exercise)}
+                      className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 text-sm"
+                      title="View exercise history"
+                    >
+                      📊
+                    </button>
+                    <button
+                      onClick={() => handleShowNotes(exercise)}
+                      className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
+                      title="Notes & Personal Records"
+                    >
+                      📝
+                    </button>
+                    <button
+                      onClick={() => handleEditExercise(exercise)}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteExercise(exercise)}
+                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Exercise Info Card */}
@@ -845,7 +952,8 @@ export default function ExercisesPage() {
                 musclesWorked={exercise.musclesWorked}
               />
             </div>
-          ))}
+          )
+        })}
         </div>
 
         {getFilteredAndSortedExercises().length === 0 && !loading && (
