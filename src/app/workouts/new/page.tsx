@@ -52,6 +52,13 @@ export default function NewWorkoutPage() {
         }
       }
     }
+    
+    // Also check for routine data from localStorage (used when coming from routines)
+    const routineData = localStorage.getItem('selectedRoutine')
+    if (routineData && !templateData) {
+      // Just let WorkoutForm handle the routine data directly
+      // We don't need to do anything here, the WorkoutForm will pick it up
+    }
   }
 
   const handleWorkoutSaved = () => {

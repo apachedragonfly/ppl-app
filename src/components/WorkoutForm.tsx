@@ -37,12 +37,23 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    loadExercises()
-    if (templateData) {
-      loadTemplateData()
-    } else {
-      loadRoutineFromStorage()
+    const initializeForm = async () => {
+      console.log('Initializing form...')
+      await loadExercises()
+      console.log('Exercises loaded, length:', exercises.length)
+      
+      if (templateData) {
+        await loadTemplateData()
+      } else {
+        // Only load routine after exercises are loaded
+        const storedRoutine = localStorage.getItem('selectedRoutine')
+        if (storedRoutine) {
+          console.log('Found stored routine, loading after exercises are ready...')
+          await loadRoutineFromStorage()
+        }
+      }
     }
+    initializeForm()
   }, [templateData])
 
   const loadRoutineFromStorage = async () => {
@@ -50,22 +61,75 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
       const storedRoutine = localStorage.getItem('selectedRoutine')
       if (storedRoutine) {
         const routine = JSON.parse(storedRoutine)
+        console.log('Loaded routine from storage:', routine)
+        
+        // If exercises aren't loaded yet, fetch them first
+        let currentExercises = exercises
+        if (exercises.length === 0) {
+          console.log('Exercises not loaded yet, fetching...')
+          try {
+            const { data: { user } } = await supabase.auth.getUser()
+            const { data, error } = await supabase
+              .from('exercises')
+              .select('*')
+              .or(`user_id.eq.${user?.id},user_id.is.null`)
+              .order('name')
+
+            if (error) throw error
+
+            // Deduplicate exercises by name, preferring user-specific ones
+            const exerciseMap = new Map()
+            data?.forEach(exercise => {
+              const existing = exerciseMap.get(exercise.name)
+              if (!existing || (!existing.user_id && exercise.user_id === user?.id)) {
+                exerciseMap.set(exercise.name, exercise)
+              }
+            })
+
+            currentExercises = Array.from(exerciseMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+            setExercises(currentExercises)
+            console.log('Fetched exercises for routine:', currentExercises.length)
+          } catch (error) {
+            console.error('Error fetching exercises for routine:', error)
+            currentExercises = []
+          }
+        }
+        
+        console.log('Current exercises array length:', currentExercises.length)
         setWorkoutType(routine.type)
         
         // Convert routine exercises to workout logs
-        const logs: WorkoutLog[] = routine.routine_exercises.map((re: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
-          tempId: `routine-${re.exercise_id}-${Date.now()}`,
-          exercise_id: re.exercise_id,
-          exercise_name: re.exercise?.name || '',
-          sets: re.sets,
-          reps: re.reps,
-          weight_kg: re.weight_kg || 0
-        }))
+        const logs: WorkoutLog[] = routine.routine_exercises.map((re: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+          console.log('Processing routine exercise:', re)
+          console.log('Exercise ID:', re.exercise_id)
+          console.log('Exercise name from routine:', re.exercise?.name)
+          
+          // Find the exercise in our exercises array
+          const foundExercise = currentExercises.find(e => e.id === re.exercise_id)
+          console.log('Found exercise in array:', foundExercise?.name)
+          
+          return {
+            tempId: `routine-${re.exercise_id}-${Date.now()}`,
+            exercise_id: re.exercise_id,
+            exercise_name: re.exercise?.name || foundExercise?.name || '',
+            sets: re.sets,
+            reps: re.reps,
+            weight_kg: re.weight_kg || 0
+          }
+        })
         
         console.log('Loading routine with logs:', logs)
+        console.log('Exercises array has', currentExercises.length, 'exercises')
         
-        // Fetch last logged weights for each exercise
-        await loadLastWeights(logs)
+        // Set the logs immediately so they show up
+        setWorkoutLogs(logs)
+        
+        // Try to fetch last logged weights for each exercise (optional)
+        try {
+          await loadLastWeights(logs)
+        } catch (error) {
+          console.log('Could not load last weights, using routine defaults:', error)
+        }
         
         localStorage.removeItem('selectedRoutine') // Clear after loading
       }
@@ -515,38 +579,59 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                   <label className="block text-sm font-medium text-foreground mb-1">
                                     Exercise
                                   </label>
-                                  <ExerciseSearch
-                                    exercises={exercises.filter(e => {
-                                      const typeMapping: Record<WorkoutType, string[]> = {
-                                        'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
-                                        'Pull': ['Back', 'Biceps', 'Pull'],
-                                        'Legs': ['Legs']
-                                      }
-                                      const targetMuscles = typeMapping[workoutType] || []
-                                      const matches = targetMuscles.includes(e.muscle_group || '')
-                                      
-                                      return matches
-                                    }).reduce((acc, current) => {
-                                      // Remove duplicates by name
-                                      const existing = acc.find(item => item.name === current.name)
-                                      if (!existing) {
-                                        acc.push(current)
-                                      }
-                                      return acc
-                                    }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name))}
-                                    onSelectExercise={(exercise) => updateExerciseLog(log.tempId, 'exercise_id', exercise.id)}
-                                    onCreateExercise={async (name, muscleGroup) => {
-                                      const newExercise = await createNewExercise(name, muscleGroup)
-                                      if (newExercise) {
-                                        updateExerciseLog(log.tempId, 'exercise_id', newExercise.id)
-                                      }
-                                    }}
-                                    placeholder="Search exercises..."
-                                  />
-                                  {log.exercise_id && (
-                                    <div className="mt-1 text-sm text-muted-foreground">
-                                      Selected: {exercises.find(e => e.id === log.exercise_id)?.name}
+                                  {log.exercise_id && exercises.find(e => e.id === log.exercise_id) ? (
+                                    // Show selected exercise with option to change
+                                    <div className="space-y-2">
+                                      <div className="p-3 border border-green-500 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <div className="font-medium text-foreground">
+                                              {exercises.find(e => e.id === log.exercise_id)?.name}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">
+                                              {exercises.find(e => e.id === log.exercise_id)?.muscle_group}
+                                            </div>
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={() => updateExerciseLog(log.tempId, 'exercise_id', '')}
+                                            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                                          >
+                                            Change
+                                          </button>
+                                        </div>
+                                      </div>
                                     </div>
+                                  ) : (
+                                    // Show exercise search
+                                    <ExerciseSearch
+                                      exercises={exercises.filter(e => {
+                                        const typeMapping: Record<WorkoutType, string[]> = {
+                                          'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
+                                          'Pull': ['Back', 'Biceps', 'Pull'],
+                                          'Legs': ['Legs']
+                                        }
+                                        const targetMuscles = typeMapping[workoutType] || []
+                                        const matches = targetMuscles.includes(e.muscle_group || '')
+                                        
+                                        return matches
+                                      }).reduce((acc, current) => {
+                                        // Remove duplicates by name
+                                        const existing = acc.find(item => item.name === current.name)
+                                        if (!existing) {
+                                          acc.push(current)
+                                        }
+                                        return acc
+                                      }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name))}
+                                      onSelectExercise={(exercise) => updateExerciseLog(log.tempId, 'exercise_id', exercise.id)}
+                                      onCreateExercise={async (name, muscleGroup) => {
+                                        const newExercise = await createNewExercise(name, muscleGroup)
+                                        if (newExercise) {
+                                          updateExerciseLog(log.tempId, 'exercise_id', newExercise.id)
+                                        }
+                                      }}
+                                      placeholder="Search exercises..."
+                                    />
                                   )}
                                 </div>
 
