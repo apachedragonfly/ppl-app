@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import WorkoutForm from '@/components/WorkoutForm'
 import { WorkoutTemplate, WorkoutTemplateExercise, QuickStartRoutine, QuickStartRoutineExercise } from '@/types'
 
-export default function NewWorkoutPage() {
+function NewWorkoutContent() {
+
   const [user, setUser] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [loading, setLoading] = useState(true)
   const [templateData, setTemplateData] = useState<{
@@ -105,5 +106,17 @@ export default function NewWorkoutPage() {
         />
       </div>
     </div>
+  )
+}
+
+export default function NewWorkoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <NewWorkoutContent />
+    </Suspense>
   )
 } 
