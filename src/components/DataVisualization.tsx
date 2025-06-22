@@ -21,7 +21,8 @@ import {
   Filter,
   Eye,
   PieChart,
-  LineChart
+  LineChart,
+  Trophy
 } from 'lucide-react'
 
 interface DataVisualizationProps {
