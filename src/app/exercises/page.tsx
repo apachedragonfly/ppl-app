@@ -8,6 +8,7 @@ import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import BulkExerciseImport from '@/components/BulkExerciseImport'
 import ExerciseStats from '@/components/ExerciseStats'
 import ExerciseHistory from '@/components/ExerciseHistory'
+import ExerciseNotes from '@/components/ExerciseNotes'
 import { mergeExerciseMetadata } from '@/lib/mergeExerciseMetadata'
 
 interface ExerciseFormData {
@@ -30,6 +31,8 @@ export default function ExercisesPage() {
   const [showStats, setShowStats] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [selectedExerciseForHistory, setSelectedExerciseForHistory] = useState<Exercise | null>(null)
+  const [showNotes, setShowNotes] = useState(false)
+  const [selectedExerciseForNotes, setSelectedExerciseForNotes] = useState<Exercise | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   
@@ -355,6 +358,11 @@ export default function ExercisesPage() {
     setShowHistory(true)
   }
 
+  const handleShowNotes = (exercise: Exercise) => {
+    setSelectedExerciseForNotes(exercise)
+    setShowNotes(true)
+  }
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -602,6 +610,19 @@ export default function ExercisesPage() {
           />
         )}
 
+        {/* Exercise Notes & PRs Modal */}
+        {showNotes && selectedExerciseForNotes && (
+          <ExerciseNotes
+            exercise={selectedExerciseForNotes}
+            userId={currentUserId}
+            onClose={() => {
+              setShowNotes(false)
+              setSelectedExerciseForNotes(null)
+            }}
+            onUpdate={loadExercises}
+          />
+        )}
+
         {/* Bulk Import Modal */}
         {showBulkImport && (
           <BulkExerciseImport
@@ -757,6 +778,11 @@ export default function ExercisesPage() {
                         📹 Video
                       </span>
                     )}
+                    {exercise.notes && (
+                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full">
+                        📝 Notes
+                      </span>
+                    )}
                     {!exercise.user_id && (
                       <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
                         Global
@@ -788,6 +814,13 @@ export default function ExercisesPage() {
                     title="View exercise history"
                   >
                     📊
+                  </button>
+                  <button
+                    onClick={() => handleShowNotes(exercise)}
+                    className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
+                    title="Notes & Personal Records"
+                  >
+                    📝
                   </button>
                   <button
                     onClick={() => handleEditExercise(exercise)}

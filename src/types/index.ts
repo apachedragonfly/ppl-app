@@ -21,6 +21,7 @@ export interface Exercise {
   muscle_group: string
   created_at: string
   is_favorite?: boolean
+  notes?: string
   video?: {
     title: string;
     url: string;
@@ -69,6 +70,23 @@ export interface RoutineExercise {
   reps: number
   weight_kg?: number
   exercise?: Exercise
+}
+
+export interface PersonalRecord {
+  id: string
+  user_id: string
+  exercise_id: string
+  record_type: '1rm' | '3rm' | '5rm' | 'max_volume' | 'max_reps' | 'endurance'
+  weight_kg?: number
+  reps?: number
+  sets?: number
+  total_volume?: number
+  duration_seconds?: number
+  notes?: string
+  achieved_date: string
+  workout_id?: string
+  created_at: string
+  updated_at: string
 }
 
 export type WorkoutType = 'Push' | 'Pull' | 'Legs' 
