@@ -1,17 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import WorkoutForm from '@/components/WorkoutForm'
+import { WorkoutTemplate, WorkoutTemplateExercise, QuickStartRoutine, QuickStartRoutineExercise } from '@/types'
 
 export default function NewWorkoutPage() {
   const [user, setUser] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [loading, setLoading] = useState(true)
+  const [templateData, setTemplateData] = useState<{
+    template: WorkoutTemplate | QuickStartRoutine
+    exercises: (WorkoutTemplateExercise | QuickStartRoutineExercise)[]
+  } | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     checkUser()
+    loadTemplateData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkUser = async () => {
@@ -27,6 +34,23 @@ export default function NewWorkoutPage() {
       router.push('/auth/login')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadTemplateData = () => {
+    const fromTemplate = searchParams.get('from') === 'template'
+    if (fromTemplate) {
+      const storedData = sessionStorage.getItem('templateWorkout')
+      if (storedData) {
+        try {
+          const data = JSON.parse(storedData)
+          setTemplateData(data)
+          // Clear the stored data after loading
+          sessionStorage.removeItem('templateWorkout')
+        } catch (error) {
+          console.error('Error parsing template data:', error)
+        }
+      }
     }
   }
 
@@ -54,10 +78,24 @@ export default function NewWorkoutPage() {
           >
             ← Back
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">New Workout</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              {templateData ? `New Workout from ${templateData.template.name}` : 'New Workout'}
+            </h1>
+            {templateData && (
+              <div className="text-sm text-muted-foreground">
+                <span className="bg-primary/10 text-primary px-2 py-1 rounded-full">
+                  Template: {templateData.template.name}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
-        <WorkoutForm onWorkoutSaved={handleWorkoutSaved} />
+        <WorkoutForm 
+          onWorkoutSaved={handleWorkoutSaved} 
+          templateData={templateData}
+        />
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase'
-import { Exercise, WorkoutType } from '@/types'
+import { Exercise, WorkoutType, WorkoutTemplate, WorkoutTemplateExercise, QuickStartRoutine, QuickStartRoutineExercise } from '@/types'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import ExerciseSearch from '@/components/ExerciseSearch'
 
@@ -21,9 +21,13 @@ interface WorkoutLog {
 
 interface WorkoutFormProps {
   onWorkoutSaved?: () => void
+  templateData?: {
+    template: WorkoutTemplate | QuickStartRoutine
+    exercises: (WorkoutTemplateExercise | QuickStartRoutineExercise)[]
+  } | null
 }
 
-export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
+export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFormProps) {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [workoutType, setWorkoutType] = useState<WorkoutType>('Push')
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0])
@@ -34,8 +38,12 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
 
   useEffect(() => {
     loadExercises()
-    loadRoutineFromStorage()
-  }, [])
+    if (templateData) {
+      loadTemplateData()
+    } else {
+      loadRoutineFromStorage()
+    }
+  }, [templateData])
 
   const loadRoutineFromStorage = async () => {
     try {
@@ -63,6 +71,58 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
       }
     } catch (error) {
       console.error('Error loading routine from storage:', error)
+    }
+  }
+
+  const loadTemplateData = async () => {
+    if (!templateData) return
+
+    try {
+      const { template, exercises: templateExercises } = templateData
+
+      // Set workout type from template
+      if ('workout_type' in template) {
+        setWorkoutType(template.workout_type as WorkoutType)
+      }
+
+      // Convert template exercises to workout logs
+      const logs: WorkoutLog[] = []
+
+      for (const templateEx of templateExercises) {
+        let exerciseId = ''
+        let exerciseName = ''
+
+        if ('exercise_id' in templateEx) {
+          // WorkoutTemplateExercise - has exercise_id
+          exerciseId = templateEx.exercise_id
+          exerciseName = templateEx.exercise?.name || ''
+        } else {
+          // QuickStartRoutineExercise - has exercise_name, need to find matching exercise
+          exerciseName = templateEx.exercise_name
+          const matchingExercise = exercises.find(e => 
+            e.name.toLowerCase() === exerciseName.toLowerCase()
+          )
+          exerciseId = matchingExercise?.id || ''
+        }
+
+        const log: WorkoutLog = {
+          tempId: `template-${templateEx.id}-${Date.now()}`,
+          exercise_id: exerciseId,
+          exercise_name: exerciseName,
+          sets: templateEx.target_sets,
+          reps: templateEx.target_reps_min || templateEx.target_reps_max || 10,
+          weight_kg: 'target_weight_kg' in templateEx ? templateEx.target_weight_kg || 0 : 0
+        }
+
+        logs.push(log)
+      }
+
+      console.log('Loading template with logs:', logs)
+
+      // Fetch last logged weights for each exercise
+      await loadLastWeights(logs)
+    } catch (error) {
+      console.error('Error loading template data:', error)
     }
   }
 

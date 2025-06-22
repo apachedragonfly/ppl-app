@@ -7,7 +7,10 @@ import {
   IoFitnessOutline,
   IoTimeOutline, 
   IoPersonOutline, 
-  IoLogOutOutline 
+  IoLogOutOutline,
+  IoDocumentTextOutline,
+  IoStatsChartOutline
+  // IoPeopleOutline - Hidden for now (social features)
 } from 'react-icons/io5';
 
 interface MenuItemType {
@@ -35,10 +38,17 @@ export default function GradientMenu() {
       action: () => router.push('/workouts/new')
     },
     { 
-      title: 'Routines', 
-      icon: <IoBookOutline />, 
+      title: 'Templates', 
+      icon: <IoDocumentTextOutline />, 
       gradientFrom: '#3b82f6', 
       gradientTo: '#1d4ed8',
+      action: () => router.push('/templates')
+    },
+    { 
+      title: 'Routines', 
+      icon: <IoBookOutline />, 
+      gradientFrom: '#10b981', 
+      gradientTo: '#059669',
       action: () => router.push('/routines')
     },
     { 
@@ -56,10 +66,25 @@ export default function GradientMenu() {
       action: () => router.push('/workouts/history')
     },
     { 
+      title: 'Analytics', 
+      icon: <IoStatsChartOutline />, 
+      gradientFrom: '#ec4899', 
+      gradientTo: '#be185d',
+      action: () => router.push('/analytics')
+    },
+    // Social features - Hidden for now (personal use app)
+    // { 
+    //   title: 'Social', 
+    //   icon: <IoPeopleOutline />, 
+    //   gradientFrom: '#f97316', 
+    //   gradientTo: '#ea580c',
+    //   action: () => router.push('/social')
+    // },
+    { 
       title: 'Profile', 
       icon: <IoPersonOutline />, 
-      gradientFrom: '#10b981', 
-      gradientTo: '#059669',
+      gradientFrom: '#8b5cf6', 
+      gradientTo: '#a855f7',
       action: () => router.push('/dashboard/profile')
     },
     { 
