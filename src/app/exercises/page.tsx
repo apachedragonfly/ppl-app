@@ -6,6 +6,7 @@ import { Exercise } from '@/types'
 import ExerciseSearch from '@/components/ExerciseSearch'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import BulkExerciseImport from '@/components/BulkExerciseImport'
+import ExerciseStats from '@/components/ExerciseStats'
 import { mergeExerciseMetadata } from '@/lib/mergeExerciseMetadata'
 
 interface ExerciseFormData {
@@ -25,6 +26,8 @@ export default function ExercisesPage() {
   const [message, setMessage] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showBulkImport, setShowBulkImport] = useState(false)
+  const [showStats, setShowStats] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string>('')
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   const [formData, setFormData] = useState<ExerciseFormData>({
     name: '',
@@ -43,6 +46,11 @@ export default function ExercisesPage() {
     try {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
+      
+      // Store user ID for other components
+      if (user?.id) {
+        setCurrentUserId(user.id)
+      }
       
       const { data, error } = await supabase
         .from('exercises')
@@ -222,6 +230,12 @@ export default function ExercisesPage() {
           <h1 className="text-3xl font-bold text-foreground">Exercise Management</h1>
           <div className="flex space-x-3">
             <button
+              onClick={() => setShowStats(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              📊 Statistics
+            </button>
+            <button
               onClick={() => setShowBulkImport(true)}
               className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md transition-colors"
             >
@@ -257,6 +271,26 @@ export default function ExercisesPage() {
         {message && (
           <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-800 rounded-md text-green-700 dark:text-green-400">
             {message}
+          </div>
+        )}
+
+        {/* Exercise Statistics Modal */}
+        {showStats && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-background border border-border rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-border">
+                <h2 className="text-xl font-semibold text-foreground">Exercise Statistics & Analytics</h2>
+                <button
+                  onClick={() => setShowStats(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <ExerciseStats userId={currentUserId} />
+              </div>
+            </div>
           </div>
         )}
 
