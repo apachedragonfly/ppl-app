@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { supabase } from '@/lib/supabase'
 import { Exercise, WorkoutType } from '@/types'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
+import ExerciseSearch from '@/components/ExerciseSearch'
 
 interface WorkoutLog {
   tempId: string
@@ -422,14 +423,8 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                                   <label className="block text-sm font-medium text-foreground mb-1">
                                     Exercise
                                   </label>
-                                  <select
-                                    value={log.exercise_id}
-                                    onChange={(e) => updateExerciseLog(log.tempId, 'exercise_id', e.target.value)}
-                                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
-                                    required
-                                  >
-                                    <option value="">Select exercise...</option>
-                                    {exercises.filter(e => {
+                                  <ExerciseSearch
+                                    exercises={exercises.filter(e => {
                                       const typeMapping: Record<WorkoutType, string[]> = {
                                         'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
                                         'Pull': ['Back', 'Biceps', 'Pull'],
@@ -446,12 +441,15 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
                                         acc.push(current)
                                       }
                                       return acc
-                                    }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name)).map(exercise => (
-                                      <option key={exercise.id} value={exercise.id}>
-                                        {exercise.name}
-                                      </option>
-                                    ))}
-                                  </select>
+                                    }, [] as typeof exercises).sort((a, b) => a.name.localeCompare(b.name))}
+                                    onSelectExercise={(exercise) => updateExerciseLog(log.tempId, 'exercise_id', exercise.id)}
+                                    placeholder="Search exercises..."
+                                  />
+                                  {log.exercise_id && (
+                                    <div className="mt-1 text-sm text-muted-foreground">
+                                      Selected: {exercises.find(e => e.id === log.exercise_id)?.name}
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* Exercise Info Card */}
