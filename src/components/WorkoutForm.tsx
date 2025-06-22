@@ -324,6 +324,20 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
               } : prevLog
             ))
           }
+        }).catch(error => {
+          console.error('Error updating exercise with last values:', error)
+          // Set default values on error
+          setWorkoutLogs(prevLogs => prevLogs.map(prevLog => 
+            prevLog.tempId === tempId ? {
+              ...prevLog,
+              last_weight: undefined,
+              last_sets: undefined,
+              last_reps: undefined,
+              weight_kg: 0,
+              sets: 3,
+              reps: 8
+            } : prevLog
+          ))
         })
         
         return updatedLog
@@ -336,6 +350,12 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
 
   const getLastValuesForExercise = async (exerciseId: string): Promise<{ weight: number, sets: number, reps: number } | null> => {
     try {
+      // Don't query if exerciseId is empty or invalid
+      if (!exerciseId || exerciseId.trim() === '') {
+        console.log('Empty exercise ID, returning null')
+        return null
+      }
+
       const { data: exercise, error } = await supabase
         .from('exercises')
         .select('last_weight_kg, last_sets, last_reps')
