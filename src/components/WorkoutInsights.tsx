@@ -119,8 +119,8 @@ export default function WorkoutInsights({ userId }: WorkoutInsightsProps) {
           )
         `)
         .eq('user_id', targetUserId)
-        .gte('workout_date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('workout_date', { ascending: false })
+        .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+        .order('date', { ascending: false })
 
       if (error) throw error
 
@@ -249,7 +249,7 @@ export default function WorkoutInsights({ userId }: WorkoutInsightsProps) {
       const lastWorkout = workouts?.[0]
       if (lastWorkout) {
         const daysSinceLastWorkout = Math.floor(
-          (Date.now() - new Date(lastWorkout.workout_date).getTime()) / (1000 * 60 * 60 * 24)
+          (Date.now() - new Date(lastWorkout.date).getTime()) / (1000 * 60 * 60 * 24)
         )
 
         if (daysSinceLastWorkout >= 3) {
@@ -264,7 +264,7 @@ export default function WorkoutInsights({ userId }: WorkoutInsightsProps) {
           })
         } else if (daysSinceLastWorkout === 0) {
           const workoutsToday = workouts.filter(w => 
-            new Date(w.workout_date).toDateString() === new Date().toDateString()
+            new Date(w.date).toDateString() === new Date().toDateString()
           ).length
 
           if (workoutsToday >= 2) {

@@ -115,10 +115,10 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
           )
         `)
         .eq('user_id', targetUserId)
-        .order('workout_date', { ascending: false })
+        .order('date', { ascending: false })
 
       if (startDate) {
-        workoutsQuery = workoutsQuery.gte('workout_date', startDate.toISOString().split('T')[0])
+        workoutsQuery = workoutsQuery.gte('date', startDate.toISOString().split('T')[0])
       }
 
       const { data: workouts, error: workoutsError } = await workoutsQuery
@@ -142,16 +142,13 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
     const totalReps = workouts.reduce((sum, w) => sum + (w.workout_logs?.reduce((s: number, l: any) => s + (l.sets * l.reps), 0) || 0), 0)
     const totalVolume = workouts.reduce((sum, w) => sum + (w.workout_logs?.reduce((s: number, l: any) => s + (l.sets * l.reps * l.weight_kg), 0) || 0), 0)
 
-    // Calculate average workout duration
-    const workoutsWithDuration = workouts.filter(w => w.duration_minutes)
-    const averageWorkoutDuration = workoutsWithDuration.length > 0 
-      ? workoutsWithDuration.reduce((sum, w) => sum + w.duration_minutes, 0) / workoutsWithDuration.length 
-      : 0
+    // Calculate average workout duration (field doesn't exist in current schema, return 0)
+    const averageWorkoutDuration = 0
 
     // Calculate workout frequency (workouts per week)
     const oldestWorkout = workouts[workouts.length - 1]
     const daysSinceStart = oldestWorkout 
-      ? Math.max(1, Math.floor((Date.now() - new Date(oldestWorkout.workout_date).getTime()) / (1000 * 60 * 60 * 24)))
+      ? Math.max(1, Math.floor((Date.now() - new Date(oldestWorkout.date).getTime()) / (1000 * 60 * 60 * 24)))
       : 1
     const workoutFrequency = (totalWorkouts / daysSinceStart) * 7
 
@@ -213,7 +210,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
     // Calculate workout type distribution
     const workoutTypeStats: Record<string, number> = {}
     workouts.forEach(workout => {
-      const type = workout.workout_type || 'Unknown'
+      const type = workout.type || 'Unknown'
       workoutTypeStats[type] = (workoutTypeStats[type] || 0) + 1
     })
 
@@ -250,7 +247,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
     if (workouts.length === 0) return { currentStreak: 0, longestStreak: 0 }
 
     const workoutDates = workouts
-      .map(w => new Date(w.workout_date).toDateString())
+      .map(w => new Date(w.date).toDateString())
       .filter((date, index, arr) => arr.indexOf(date) === index)
       .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
 
@@ -301,7 +298,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
     const weeklyData: Record<string, { workouts: number; volume: number; duration: number }> = {}
 
     workouts.forEach(workout => {
-      const workoutDate = new Date(workout.workout_date)
+      const workoutDate = new Date(workout.date)
       const weekStart = new Date(workoutDate)
       weekStart.setDate(workoutDate.getDate() - workoutDate.getDay())
       const weekKey = weekStart.toISOString().split('T')[0]
@@ -313,7 +310,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
       weeklyData[weekKey].workouts += 1
       weeklyData[weekKey].volume += workout.workout_logs?.reduce((sum: number, log: any) => 
         sum + (log.sets * log.reps * log.weight_kg), 0) || 0
-      weeklyData[weekKey].duration += workout.duration_minutes || 0
+      weeklyData[weekKey].duration += 0 // duration_minutes field doesn't exist in current schema
     })
 
     return Object.entries(weeklyData)
@@ -333,7 +330,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
         }
 
         exerciseData[exerciseName].push({
-          date: workout.workout_date,
+          date: workout.date,
           weight: log.weight_kg,
           volume: log.sets * log.reps * log.weight_kg
         })
@@ -385,13 +382,13 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
             maxWeight: log.weight_kg,
             maxVolume: volume,
             maxReps: log.reps,
-            achievedDate: workout.workout_date
+            achievedDate: workout.date
           }
         } else {
           const record = exerciseRecords[exerciseName]
           if (log.weight_kg > record.maxWeight) {
             record.maxWeight = log.weight_kg
-            record.achievedDate = workout.workout_date
+            record.achievedDate = workout.date
           }
           if (volume > record.maxVolume) {
             record.maxVolume = volume
