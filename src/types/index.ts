@@ -20,6 +20,11 @@ export interface Exercise {
   name: string
   muscle_group: string
   created_at: string
+  video?: {
+    title: string;
+    url: string;
+    author?: string;
+  };
 }
 
 export interface Workout {
