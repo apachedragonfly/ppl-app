@@ -36,6 +36,7 @@ export default function ExercisesPage() {
   const [filterMuscleGroup, setFilterMuscleGroup] = useState<string>('')
   const [filterHasVideo, setFilterHasVideo] = useState<'all' | 'with_video' | 'without_video'>('all')
   const [filterSource, setFilterSource] = useState<'all' | 'user' | 'global'>('all')
+  const [filterFavorites, setFilterFavorites] = useState<'all' | 'favorites_only'>('all')
   const [formData, setFormData] = useState<ExerciseFormData>({
     name: '',
     muscle_group: '',
@@ -59,9 +60,13 @@ export default function ExercisesPage() {
         setCurrentUserId(user.id)
       }
       
+      // Get exercises with favorites information
       const { data, error } = await supabase
         .from('exercises')
-        .select('*')
+        .select(`
+          *,
+          exercise_favorites!left(id)
+        `)
         .or(`user_id.eq.${user?.id},user_id.is.null`)
         .order('name')
 
@@ -80,7 +85,9 @@ export default function ExercisesPage() {
         musclesWorked: exercise.muscles_worked ? {
           primary: exercise.muscles_worked.primary || [],
           secondary: exercise.muscles_worked.secondary || []
-        } : undefined
+        } : undefined,
+        // Check if exercise is favorited by current user
+        is_favorite: exercise.exercise_favorites && exercise.exercise_favorites.length > 0
       })) || []
 
       // Deduplicate exercises by name, preferring user-specific ones
@@ -134,6 +141,11 @@ export default function ExercisesPage() {
       filtered = filtered.filter(exercise => !exercise.user_id)
     }
 
+    // Apply favorites filter
+    if (filterFavorites === 'favorites_only') {
+      filtered = filtered.filter(exercise => exercise.is_favorite)
+    }
+
     // Apply sorting
     filtered.sort((a, b) => {
       let aValue: string | Date
@@ -181,6 +193,7 @@ export default function ExercisesPage() {
     setFilterMuscleGroup('')
     setFilterHasVideo('all')
     setFilterSource('all')
+    setFilterFavorites('all')
     setSortBy('name')
     setSortOrder('asc')
   }
@@ -297,6 +310,43 @@ export default function ExercisesPage() {
     }
   }
 
+  const handleToggleFavorite = async (exercise: Exercise) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      if (exercise.is_favorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('exercise_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('exercise_id', exercise.id)
+
+        if (error) throw error
+        setMessage(`Removed ${exercise.name} from favorites`)
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('exercise_favorites')
+          .insert([{
+            user_id: user.id,
+            exercise_id: exercise.id
+          }])
+
+        if (error) throw error
+        setMessage(`Added ${exercise.name} to favorites`)
+      }
+
+      setTimeout(() => setMessage(''), 3000)
+      loadExercises()
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      setError('Failed to update favorite status')
+      setTimeout(() => setError(''), 3000)
+    }
+  }
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -371,7 +421,7 @@ export default function ExercisesPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               {/* Sort By */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
@@ -451,6 +501,21 @@ export default function ExercisesPage() {
                   <option value="global">Global Exercises</option>
                 </select>
               </div>
+
+              {/* Favorites Filter */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Favorites
+                </label>
+                <select
+                  value={filterFavorites}
+                  onChange={(e) => setFilterFavorites(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                >
+                  <option value="all">All Exercises</option>
+                  <option value="favorites_only">⭐ Favorites Only</option>
+                </select>
+              </div>
             </div>
 
             {/* Filter Summary */}
@@ -469,11 +534,16 @@ export default function ExercisesPage() {
                     {filterHasVideo === 'with_video' ? 'With Video' : 'No Video'}
                   </span>
                 )}
-                {filterSource !== 'all' && (
-                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
-                    {filterSource === 'user' ? 'My Exercises' : 'Global'}
-                  </span>
-                )}
+                                 {filterSource !== 'all' && (
+                   <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                     {filterSource === 'user' ? 'My Exercises' : 'Global'}
+                   </span>
+                 )}
+                 {filterFavorites === 'favorites_only' && (
+                   <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                     ⭐ Favorites
+                   </span>
+                 )}
               </div>
             </div>
           </div>
@@ -681,6 +751,17 @@ export default function ExercisesPage() {
                   )}
                 </div>
                 <div className="flex space-x-2 ml-3">
+                  <button
+                    onClick={() => handleToggleFavorite(exercise)}
+                    className={`text-sm font-medium transition-colors ${
+                      exercise.is_favorite
+                        ? 'text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300'
+                        : 'text-gray-400 hover:text-yellow-600 dark:text-gray-500 dark:hover:text-yellow-400'
+                    }`}
+                    title={exercise.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    {exercise.is_favorite ? '⭐' : '☆'}
+                  </button>
                   <button
                     onClick={() => handleEditExercise(exercise)}
                     className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"

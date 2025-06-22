@@ -20,6 +20,7 @@ export interface Exercise {
   name: string
   muscle_group: string
   created_at: string
+  is_favorite?: boolean
   video?: {
     title: string;
     url: string;
