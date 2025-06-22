@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Exercise } from '@/types'
 import ExerciseSearch from '@/components/ExerciseSearch'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
+import BulkExerciseImport from '@/components/BulkExerciseImport'
 import { mergeExerciseMetadata } from '@/lib/mergeExerciseMetadata'
 
 interface ExerciseFormData {
@@ -23,6 +24,7 @@ export default function ExercisesPage() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showBulkImport, setShowBulkImport] = useState(false)
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   const [formData, setFormData] = useState<ExerciseFormData>({
     name: '',
@@ -218,12 +220,20 @@ export default function ExercisesPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-foreground">Exercise Management</h1>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
-          >
-            + Create Exercise
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => setShowBulkImport(true)}
+              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Bulk Import
+            </button>
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              + Create Exercise
+            </button>
+          </div>
         </div>
 
         {/* Search and Filter */}
@@ -248,6 +258,19 @@ export default function ExercisesPage() {
           <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-800 rounded-md text-green-700 dark:text-green-400">
             {message}
           </div>
+        )}
+
+        {/* Bulk Import Modal */}
+        {showBulkImport && (
+          <BulkExerciseImport
+            onImportComplete={() => {
+              setShowBulkImport(false)
+              setMessage('Exercises imported successfully!')
+              setTimeout(() => setMessage(''), 3000)
+              loadExercises()
+            }}
+            onClose={() => setShowBulkImport(false)}
+          />
         )}
 
         {/* Create/Edit Form Modal */}
