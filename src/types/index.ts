@@ -25,6 +25,7 @@ export interface Exercise {
     url: string;
     author?: string;
   };
+  description?: string;
 }
 
 export interface Workout {
