@@ -61,38 +61,29 @@ export default function WorkoutInsights({ userId }: WorkoutInsightsProps) {
         throw new Error('User not authenticated')
       }
 
-      // Load goals (for now we'll simulate this since we don't have the table yet)
-      const mockGoals: Goal[] = [
-        {
-          id: '1',
-          title: 'Bench Press 100kg',
-          description: 'Achieve a 100kg bench press',
-          target_value: 100,
-          current_value: 85,
-          unit: 'kg',
-          target_date: '2024-12-31',
-          category: 'strength',
-          created_at: '2024-01-01',
-          achieved: false
-        },
-        {
-          id: '2',
-          title: 'Workout 4x per week',
-          description: 'Maintain consistent workout frequency',
-          target_value: 4,
-          current_value: 3.2,
-          unit: 'workouts/week',
-          target_date: '2024-12-31',
-          category: 'frequency',
-          created_at: '2024-01-01',
-          achieved: false
+      // Load goals from database
+      const { data: goalsData, error: goalsError } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false })
+
+      if (goalsError) {
+        console.error('Error loading goals:', goalsError)
+        // If table doesn't exist yet, use empty array
+        if (goalsError.code === '42P01') {
+          console.warn('Goals table not found - please run the add_goals_table.sql migration')
+          setGoals([])
+        } else {
+          throw goalsError
         }
-      ]
+      } else {
+        setGoals(goalsData || [])
+      }
 
       // Generate insights based on recent workout data
       const insights = await generateInsights(targetUserId)
 
-      setGoals(mockGoals)
       setInsights(insights)
     } catch (error) {
       console.error('Error loading insights data:', error)
@@ -295,25 +286,48 @@ export default function WorkoutInsights({ userId }: WorkoutInsightsProps) {
   const createGoal = async () => {
     if (!newGoal.title.trim()) return
 
-    // For now, we'll just add to local state since we don't have the database table
-    const goal: Goal = {
-      id: Date.now().toString(),
-      ...newGoal,
-      current_value: 0,
-      achieved: false,
-      created_at: new Date().toISOString()
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
 
-    setGoals([...goals, goal])
-    setNewGoal({
-      title: '',
-      description: '',
-      target_value: 0,
-      unit: 'kg',
-      target_date: '',
-      category: 'strength'
-    })
-    setShowCreateGoal(false)
+      const { data, error } = await supabase
+        .from('goals')
+        .insert({
+          user_id: user.id,
+          title: newGoal.title,
+          description: newGoal.description,
+          target_value: newGoal.target_value,
+          current_value: 0,
+          unit: newGoal.unit,
+          target_date: newGoal.target_date,
+          category: newGoal.category,
+          achieved: false
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Add to local state for immediate UI update
+      if (data) {
+        setGoals([data, ...goals])
+      }
+
+      // Reset form
+      setNewGoal({
+        title: '',
+        description: '',
+        target_value: 0,
+        unit: 'kg',
+        target_date: '',
+        category: 'strength'
+      })
+      setShowCreateGoal(false)
+    } catch (error) {
+      console.error('Error creating goal:', error)
+      setError('Failed to create goal')
+      setTimeout(() => setError(''), 3000)
+    }
   }
 
   const getInsightIcon = (type: Insight['type']) => {
