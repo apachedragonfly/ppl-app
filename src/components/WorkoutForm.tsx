@@ -126,7 +126,7 @@ export default function WorkoutForm({ onWorkoutSaved }: WorkoutFormProps) {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('exercises')
-        .select('id, user_id, name, muscle_group, created_at, video, description, muscles_worked')
+        .select('*')
         .or(`user_id.eq.${user?.id},user_id.is.null`)
         .order('name')
 

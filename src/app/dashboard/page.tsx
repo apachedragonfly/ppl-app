@@ -10,6 +10,7 @@ import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
+import { mockExerciseData } from '@/data/mockExerciseData'
 
 export default function Dashboard() {
   const { currentUser, currentProfile, isLoading } = useAccount()
@@ -80,17 +81,10 @@ export default function Dashboard() {
           {/* TEST: ExerciseInfoCard - Remove when tasks complete */}
           <div className="mt-6">
             <ExerciseInfoCard
-              exerciseName="Barbell Back Squat (high-bar)"
-              video={{
-                title: "Perfect Squat Technique",
-                url: "https://www.youtube.com/watch?v=bEv6CCg2BC8",
-                author: "Jeff Nippard"
-              }}
-              description="A fundamental lower body movement that builds strength in the quads, glutes, and core."
-              musclesWorked={{
-                primary: ["Quadriceps", "Glutes"],
-                secondary: ["Hamstrings", "Core", "Lower Back"]
-              }}
+              exerciseName={mockExerciseData[0].name}
+              video={mockExerciseData[0].video}
+              description={mockExerciseData[0].description}
+              musclesWorked={mockExerciseData[0].musclesWorked}
             />
           </div>
         </div>
