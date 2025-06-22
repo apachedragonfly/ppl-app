@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { 
   IoPencilOutline, 
   IoBookOutline, 
+  IoFitnessOutline,
   IoTimeOutline, 
   IoPersonOutline, 
   IoLogOutOutline 
@@ -39,6 +40,13 @@ export default function GradientMenu() {
       gradientFrom: '#3b82f6', 
       gradientTo: '#1d4ed8',
       action: () => router.push('/routines')
+    },
+    { 
+      title: 'Exercises', 
+      icon: <IoFitnessOutline />, 
+      gradientFrom: '#06b6d4', 
+      gradientTo: '#0891b2',
+      action: () => router.push('/exercises')
     },
     { 
       title: 'History', 
