@@ -29,6 +29,13 @@ export default function ExercisesPage() {
   const [showStats, setShowStats] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
+  
+  // Filtering and sorting state
+  const [sortBy, setSortBy] = useState<'name' | 'muscle_group' | 'created_at'>('name')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [filterMuscleGroup, setFilterMuscleGroup] = useState<string>('')
+  const [filterHasVideo, setFilterHasVideo] = useState<'all' | 'with_video' | 'without_video'>('all')
+  const [filterSource, setFilterSource] = useState<'all' | 'user' | 'global'>('all')
   const [formData, setFormData] = useState<ExerciseFormData>({
     name: '',
     muscle_group: '',
@@ -100,6 +107,82 @@ export default function ExercisesPage() {
 
   const handleSearch = (searchExercises: Exercise[]) => {
     setFilteredExercises(searchExercises)
+  }
+
+  // Apply filters and sorting to exercises
+  const getFilteredAndSortedExercises = () => {
+    let filtered = [...filteredExercises]
+
+    // Apply muscle group filter
+    if (filterMuscleGroup) {
+      filtered = filtered.filter(exercise => 
+        exercise.muscle_group?.toLowerCase() === filterMuscleGroup.toLowerCase()
+      )
+    }
+
+    // Apply video filter
+    if (filterHasVideo === 'with_video') {
+      filtered = filtered.filter(exercise => exercise.video?.url)
+    } else if (filterHasVideo === 'without_video') {
+      filtered = filtered.filter(exercise => !exercise.video?.url)
+    }
+
+    // Apply source filter
+    if (filterSource === 'user') {
+      filtered = filtered.filter(exercise => exercise.user_id === currentUserId)
+    } else if (filterSource === 'global') {
+      filtered = filtered.filter(exercise => !exercise.user_id)
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue: string | Date
+      let bValue: string | Date
+
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+          break
+        case 'muscle_group':
+          aValue = (a.muscle_group || '').toLowerCase()
+          bValue = (b.muscle_group || '').toLowerCase()
+          break
+        case 'created_at':
+          aValue = new Date(a.created_at)
+          bValue = new Date(b.created_at)
+          break
+        default:
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+      }
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }
+
+  // Get unique muscle groups for filter dropdown
+  const getMuscleGroups = () => {
+    const groups = new Set<string>()
+    exercises.forEach(exercise => {
+      if (exercise.muscle_group) {
+        groups.add(exercise.muscle_group)
+      }
+    })
+    return Array.from(groups).sort()
+  }
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setFilterMuscleGroup('')
+    setFilterHasVideo('all')
+    setFilterSource('all')
+    setSortBy('name')
+    setSortOrder('asc')
   }
 
   const handleCreateExercise = async (name: string, muscleGroup: string) => {
@@ -275,6 +358,125 @@ export default function ExercisesPage() {
             placeholder="Search exercises by name..."
             className="mb-4"
           />
+
+          {/* Advanced Filters and Sorting */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-foreground">Filters & Sorting</h3>
+              <button
+                onClick={clearAllFilters}
+                className="text-sm text-primary hover:text-primary/80 font-medium"
+              >
+                Clear All
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Sort By */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Sort By
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                >
+                  <option value="name">Name</option>
+                  <option value="muscle_group">Muscle Group</option>
+                  <option value="created_at">Date Created</option>
+                </select>
+              </div>
+
+              {/* Sort Order */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Order
+                </label>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                >
+                  <option value="asc">A-Z / Oldest</option>
+                  <option value="desc">Z-A / Newest</option>
+                </select>
+              </div>
+
+              {/* Muscle Group Filter */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Muscle Group
+                </label>
+                <select
+                  value={filterMuscleGroup}
+                  onChange={(e) => setFilterMuscleGroup(e.target.value)}
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                >
+                  <option value="">All Groups</option>
+                  {getMuscleGroups().map(group => (
+                    <option key={group} value={group}>{group}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Video Filter */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Video Status
+                </label>
+                <select
+                  value={filterHasVideo}
+                  onChange={(e) => setFilterHasVideo(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                >
+                  <option value="all">All Exercises</option>
+                  <option value="with_video">With Video</option>
+                  <option value="without_video">Without Video</option>
+                </select>
+              </div>
+
+              {/* Source Filter */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Source
+                </label>
+                <select
+                  value={filterSource}
+                  onChange={(e) => setFilterSource(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring text-sm"
+                >
+                  <option value="all">All Sources</option>
+                  <option value="user">My Exercises</option>
+                  <option value="global">Global Exercises</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Filter Summary */}
+            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+              <div>
+                Showing {getFilteredAndSortedExercises().length} of {filteredExercises.length} exercises
+              </div>
+              <div className="flex items-center space-x-4">
+                {filterMuscleGroup && (
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                    {filterMuscleGroup}
+                  </span>
+                )}
+                {filterHasVideo !== 'all' && (
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                    {filterHasVideo === 'with_video' ? 'With Video' : 'No Video'}
+                  </span>
+                )}
+                {filterSource !== 'all' && (
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                    {filterSource === 'user' ? 'My Exercises' : 'Global'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Messages */}
@@ -454,14 +656,31 @@ export default function ExercisesPage() {
 
         {/* Exercise List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredExercises.map(exercise => (
-            <div key={exercise.id} className="bg-card border border-border rounded-lg p-4 shadow-sm">
+          {getFilteredAndSortedExercises().map(exercise => (
+            <div key={exercise.id} className="bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-foreground">{exercise.name}</h3>
-                  <p className="text-sm text-muted-foreground">{exercise.muscle_group}</p>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <h3 className="font-semibold text-foreground">{exercise.name}</h3>
+                    {exercise.video?.url && (
+                      <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+                        📹 Video
+                      </span>
+                    )}
+                    {!exercise.user_id && (
+                      <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
+                        Global
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-1">{exercise.muscle_group}</p>
+                  {exercise.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {exercise.description}
+                    </p>
+                  )}
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 ml-3">
                   <button
                     onClick={() => handleEditExercise(exercise)}
                     className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
@@ -488,15 +707,26 @@ export default function ExercisesPage() {
           ))}
         </div>
 
-        {filteredExercises.length === 0 && !loading && (
+        {getFilteredAndSortedExercises().length === 0 && !loading && (
           <div className="text-center py-12">
-            <div className="text-muted-foreground text-lg mb-4">No exercises found</div>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              Create Your First Exercise
-            </button>
+            <div className="text-muted-foreground text-lg mb-4">
+              {filteredExercises.length === 0 ? 'No exercises found' : 'No exercises match your filters'}
+            </div>
+            {filteredExercises.length === 0 ? (
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
+              >
+                Create Your First Exercise
+              </button>
+            ) : (
+              <button
+                onClick={clearAllFilters}
+                className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md transition-colors"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         )}
       </div>
