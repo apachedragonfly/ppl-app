@@ -33,6 +33,19 @@ export default function ExerciseInfoCard({
         </div>
       )}
       
+      {!video?.url && (
+        <div className="text-sm">
+          <a
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exerciseName + " exercise")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline hover:text-blue-600 transition-colors"
+          >
+            Search YouTube for "{exerciseName}"
+          </a>
+        </div>
+      )}
+      
       {description && description.trim() && (
         <p className="text-base text-muted-foreground leading-relaxed">{description}</p>
       )}
