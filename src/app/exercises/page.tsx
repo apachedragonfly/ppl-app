@@ -60,9 +60,25 @@ export default function ExercisesPage() {
 
       if (error) throw error
 
+      // Transform database format to interface format
+      const transformedExercises = data?.map(exercise => ({
+        ...exercise,
+        // Map database video columns to video object
+        video: exercise.video_url ? {
+          url: exercise.video_url,
+          title: exercise.video_title || exercise.name,
+          author: exercise.video_author
+        } : undefined,
+        // Map muscles_worked JSONB to musclesWorked object
+        musclesWorked: exercise.muscles_worked ? {
+          primary: exercise.muscles_worked.primary || [],
+          secondary: exercise.muscles_worked.secondary || []
+        } : undefined
+      })) || []
+
       // Deduplicate exercises by name, preferring user-specific ones
       const exerciseMap = new Map()
-      data?.forEach(exercise => {
+      transformedExercises.forEach(exercise => {
         const existing = exerciseMap.get(exercise.name)
         if (!existing || (!existing.user_id && exercise.user_id === user?.id)) {
           exerciseMap.set(exercise.name, exercise)
@@ -70,10 +86,10 @@ export default function ExercisesPage() {
       })
 
       const deduplicatedExercises = Array.from(exerciseMap.values())
-      const exercisesWithMetadata = mergeExerciseMetadata(deduplicatedExercises)
+      // No need for mergeExerciseMetadata anymore since data comes from DB
       
-      setExercises(exercisesWithMetadata)
-      setFilteredExercises(exercisesWithMetadata)
+      setExercises(deduplicatedExercises)
+      setFilteredExercises(deduplicatedExercises)
     } catch (error) {
       console.error('Error loading exercises:', error)
       setError('Failed to load exercises')
@@ -124,15 +140,15 @@ export default function ExercisesPage() {
         name: formData.name,
         muscle_group: formData.muscle_group,
         user_id: user.id,
-        // Note: These fields don't exist in DB yet, will be added in Task 24
-        ...(formData.description && { description: formData.description }),
-        ...(formData.video_url && { 
-          video: {
-            url: formData.video_url,
-            title: formData.video_title || formData.name,
-            author: formData.video_author
-          }
-        })
+        description: formData.description || null,
+        video_url: formData.video_url || null,
+        video_title: formData.video_title || null,
+        video_author: formData.video_author || null,
+        // For now, we'll set basic muscles_worked structure
+        muscles_worked: formData.muscle_group ? {
+          primary: [formData.muscle_group],
+          secondary: []
+        } : null
       }
 
       if (editingExercise) {

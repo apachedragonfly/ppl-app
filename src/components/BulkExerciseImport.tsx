@@ -156,10 +156,22 @@ export default function BulkExerciseImport({ onImportComplete, onClose }: BulkEx
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const exercisesToImport = Array.from(selectedExercises).map(index => ({
-        ...PREDEFINED_EXERCISES[index],
-        user_id: user.id
-      }))
+      const exercisesToImport = Array.from(selectedExercises).map(index => {
+        const exercise = PREDEFINED_EXERCISES[index]
+        return {
+          name: exercise.name,
+          muscle_group: exercise.muscle_group,
+          description: exercise.description || null,
+          video_url: exercise.video_url || null,
+          video_title: exercise.video_title || null,
+          video_author: exercise.video_author || null,
+          muscles_worked: exercise.muscle_group ? {
+            primary: [exercise.muscle_group],
+            secondary: []
+          } : null,
+          user_id: user.id
+        }
+      })
 
       const { error } = await supabase
         .from('exercises')
@@ -196,7 +208,16 @@ export default function BulkExerciseImport({ onImportComplete, onClose }: BulkEx
       if (!user) throw new Error('Not authenticated')
 
       const exercisesToImport = exercises.map(exercise => ({
-        ...exercise,
+        name: exercise.name,
+        muscle_group: exercise.muscle_group,
+        description: exercise.description || null,
+        video_url: exercise.video_url || null,
+        video_title: exercise.video_title || null,
+        video_author: exercise.video_author || null,
+        muscles_worked: exercise.muscle_group ? {
+          primary: [exercise.muscle_group],
+          secondary: []
+        } : null,
         user_id: user.id
       }))
 
