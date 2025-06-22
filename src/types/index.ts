@@ -26,6 +26,10 @@ export interface Exercise {
     author?: string;
   };
   description?: string;
+  musclesWorked?: {
+    primary: string[];
+    secondary?: string[];
+  };
 }
 
 export interface Workout {
