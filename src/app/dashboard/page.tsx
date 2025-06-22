@@ -9,6 +9,7 @@ import GradientMenu from '@/components/GradientMenu'
 import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
+import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 
 export default function Dashboard() {
   const { currentUser, currentProfile, isLoading } = useAccount()
@@ -74,6 +75,23 @@ export default function Dashboard() {
             <div className="lg:col-span-2 bg-card rounded-lg shadow-lg border border-border order-2">
               <ChartProgress userId={currentUser.id} />
             </div>
+          </div>
+
+          {/* TEST: ExerciseInfoCard - Remove when tasks complete */}
+          <div className="mt-6">
+            <ExerciseInfoCard
+              exerciseName="Barbell Back Squat (high-bar)"
+              video={{
+                title: "Perfect Squat Technique",
+                url: "https://www.youtube.com/watch?v=bEv6CCg2BC8",
+                author: "Jeff Nippard"
+              }}
+              description="A fundamental lower body movement that builds strength in the quads, glutes, and core."
+              musclesWorked={{
+                primary: ["Quadriceps", "Glutes"],
+                secondary: ["Hamstrings", "Core", "Lower Back"]
+              }}
+            />
           </div>
         </div>
       </div>

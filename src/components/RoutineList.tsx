@@ -3,9 +3,24 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Routine, RoutineExercise } from '@/types'
+import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 
 interface RoutineWithExercises extends Routine {
-  routine_exercises: (RoutineExercise & { exercise: { name: string } })[]
+  routine_exercises: (RoutineExercise & { 
+    exercise: { 
+      name: string;
+      video?: {
+        title: string;
+        url: string;
+        author?: string;
+      };
+      description?: string;
+      musclesWorked?: {
+        primary: string[];
+        secondary?: string[];
+      };
+    } 
+  })[]
 }
 
 interface RoutineListProps {
@@ -31,7 +46,10 @@ export default function RoutineList({ userId, onEdit, onLoadToWorkout }: Routine
           routine_exercises (
             *,
             exercise:exercises (
-              name
+              name,
+              video,
+              description,
+              muscles_worked
             )
           )
         `)
@@ -138,13 +156,25 @@ export default function RoutineList({ userId, onEdit, onLoadToWorkout }: Routine
               {routine.routine_exercises
                 .sort((a, b) => a.order_index - b.order_index)
                 .map((re, index) => (
-                  <div key={re.id} className="flex items-center justify-between bg-secondary rounded p-2">
-                    <span className="text-sm text-secondary-foreground truncate">
-                      {index + 1}. {re.exercise.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
-                      {re.sets} × {re.reps}
-                    </span>
+                  <div key={re.id}>
+                    <div className="flex items-center justify-between bg-secondary rounded p-2">
+                      <span className="text-sm text-secondary-foreground truncate">
+                        {index + 1}. {re.exercise.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
+                        {re.sets} × {re.reps}
+                      </span>
+                    </div>
+                    {re.exercise.video && (
+                      <div className="mt-2">
+                        <ExerciseInfoCard
+                          exerciseName={re.exercise.name}
+                          video={re.exercise.video}
+                          description={re.exercise.description}
+                          musclesWorked={(re.exercise as any).muscles_worked}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
             </div>
