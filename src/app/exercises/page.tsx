@@ -70,14 +70,11 @@ export default function ExercisesPage() {
         setCurrentUserId(user.id)
       }
       
-      // Get exercises with favorites information
+      // Get exercises (temporarily without favorites until table is created)
       const { data, error } = await supabase
         .from('exercises')
-        .select(`
-          *,
-          exercise_favorites!left(id)
-        `)
-        .or(`user_id.eq.${user?.id},user_id.is.null`)
+        .select('*')
+        .or(user?.id ? `user_id.eq.${user.id},user_id.is.null` : `user_id.is.null`)
         .order('name')
 
       if (error) throw error
@@ -85,19 +82,15 @@ export default function ExercisesPage() {
       // Transform database format to interface format
       const transformedExercises = data?.map(exercise => ({
         ...exercise,
-        // Map database video columns to video object
-        video: exercise.video_url ? {
-          url: exercise.video_url,
-          title: exercise.video_title || exercise.name,
-          author: exercise.video_author
-        } : undefined,
+        // Map database video JSONB to video object (already in correct format)
+        video: exercise.video || undefined,
         // Map muscles_worked JSONB to musclesWorked object
         musclesWorked: exercise.muscles_worked ? {
           primary: exercise.muscles_worked.primary || [],
           secondary: exercise.muscles_worked.secondary || []
         } : undefined,
-        // Check if exercise is favorited by current user
-        is_favorite: exercise.exercise_favorites && exercise.exercise_favorites.length > 0
+        // Temporarily set favorites to false until table is created
+        is_favorite: false
       })) || []
 
       // Deduplicate exercises by name, preferring user-specific ones
@@ -114,9 +107,15 @@ export default function ExercisesPage() {
       
       setExercises(deduplicatedExercises)
       setFilteredExercises(deduplicatedExercises)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading exercises:', error)
-      setError('Failed to load exercises')
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint
+      })
+      setError(`Failed to load exercises: ${error?.message || 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -247,9 +246,11 @@ export default function ExercisesPage() {
         muscle_group: formData.muscle_group,
         user_id: user.id,
         description: formData.description || null,
-        video_url: formData.video_url || null,
-        video_title: formData.video_title || null,
-        video_author: formData.video_author || null,
+        video: formData.video_url ? {
+          url: formData.video_url,
+          title: formData.video_title || formData.name,
+          author: formData.video_author || null
+        } : null,
         // For now, we'll set basic muscles_worked structure
         muscles_worked: formData.muscle_group ? {
           primary: [formData.muscle_group],

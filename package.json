@@ -9,7 +9,10 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "seed:exercise-metadata": "node scripts/batchUpdateExerciseMetadata.mjs"
+    "seed:exercise-metadata": "node scripts/batchUpdateExerciseMetadata.mjs",
+    "check:db-schema": "node scripts/checkDatabaseSchema.mjs",
+    "test:queries": "node scripts/testSimpleQuery.mjs",
+    "create:favorites-table": "node scripts/createFavoritesTable.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

@@ -162,9 +162,11 @@ export default function BulkExerciseImport({ onImportComplete, onClose }: BulkEx
           name: exercise.name,
           muscle_group: exercise.muscle_group,
           description: exercise.description || null,
-          video_url: exercise.video_url || null,
-          video_title: exercise.video_title || null,
-          video_author: exercise.video_author || null,
+          video: exercise.video_url ? {
+            url: exercise.video_url,
+            title: exercise.video_title || exercise.name,
+            author: exercise.video_author || null
+          } : null,
           muscles_worked: exercise.muscle_group ? {
             primary: [exercise.muscle_group],
             secondary: []
@@ -211,9 +213,11 @@ export default function BulkExerciseImport({ onImportComplete, onClose }: BulkEx
         name: exercise.name,
         muscle_group: exercise.muscle_group,
         description: exercise.description || null,
-        video_url: exercise.video_url || null,
-        video_title: exercise.video_title || null,
-        video_author: exercise.video_author || null,
+        video: exercise.video_url ? {
+          url: exercise.video_url,
+          title: exercise.video_title || exercise.name,
+          author: exercise.video_author || null
+        } : null,
         muscles_worked: exercise.muscle_group ? {
           primary: [exercise.muscle_group],
           secondary: []
