@@ -14,6 +14,8 @@ interface WorkoutLog {
   sets: number
   reps: number
   weight_kg: number
+  rpe?: number // Rate of Perceived Exertion (1-10)
+  rir?: number // Reps in Reserve (0-5)
   last_weight?: number // Last logged weight for this exercise
   last_sets?: number // Last logged sets for this exercise
   last_reps?: number // Last logged reps for this exercise
@@ -494,7 +496,9 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
         exercise_id: log.exercise_id,
         sets: log.sets,
         reps: log.reps,
-        weight_kg: log.weight_kg
+        weight_kg: log.weight_kg,
+        rpe: log.rpe || null,
+        rir: log.rir || null
       }))
 
       const { error: logsError } = await supabase
@@ -747,6 +751,50 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                         ) : null}
                                       </div>
                                     )}
+                                  </div>
+                                </div>
+
+                                {/* Advanced Metrics - RPE and RIR */}
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                  <div>
+                                    <label className="block text-xs font-medium text-foreground mb-1">
+                                      RPE (1-10)
+                                      <span className="text-xs text-muted-foreground ml-1">
+                                        - How hard?
+                                      </span>
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={log.rpe || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseInt(e.target.value)
+                                        updateExerciseLog(log.tempId, 'rpe', value)
+                                      }}
+                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
+                                      min="1"
+                                      max="10"
+                                      placeholder="Optional"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-foreground mb-1">
+                                      RIR (0-5)
+                                      <span className="text-xs text-muted-foreground ml-1">
+                                        - Reps left?
+                                      </span>
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={log.rir || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseInt(e.target.value)
+                                        updateExerciseLog(log.tempId, 'rir', value)
+                                      }}
+                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
+                                      min="0"
+                                      max="5"
+                                      placeholder="Optional"
+                                    />
                                   </div>
                                 </div>
                               </div>
