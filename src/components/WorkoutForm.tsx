@@ -630,15 +630,8 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                     // Show exercise search
                                     <ExerciseSearch
                                       exercises={exercises.filter(e => {
-                                        const typeMapping: Record<WorkoutType, string[]> = {
-                                          'Push': ['Chest', 'Shoulders', 'Triceps', 'Push'],
-                                          'Pull': ['Back', 'Biceps', 'Pull'],
-                                          'Legs': ['Legs']
-                                        }
-                                        const targetMuscles = typeMapping[workoutType] || []
-                                        const matches = targetMuscles.includes(e.muscle_group || '')
-                                        
-                                        return matches
+                                        // Filter exercises by workout type - exercises now use 'Push', 'Pull', 'Legs' as muscle_group
+                                        return e.muscle_group === workoutType
                                       }).reduce((acc, current) => {
                                         // Remove duplicates by name
                                         const existing = acc.find(item => item.name === current.name)

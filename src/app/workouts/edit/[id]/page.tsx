@@ -126,15 +126,9 @@ export default function EditWorkoutPage() {
   const getFilteredExercises = () => {
     if (!workout) return []
     
-    const typeMapping: Record<WorkoutType, string[]> = {
-      'Push': ['Chest', 'Shoulders', 'Triceps'],
-      'Pull': ['Back', 'Biceps'],
-      'Legs': ['Legs']
-    }
-    
-    const targetMuscles = typeMapping[workout.type] || []
+    // Filter exercises by workout type - exercises now use 'Push', 'Pull', 'Legs' as muscle_group
     const filtered = exercises.filter(ex => 
-      targetMuscles.includes(ex.muscle_group || '')
+      ex.muscle_group === workout.type
     )
     
     // Remove duplicates by name
