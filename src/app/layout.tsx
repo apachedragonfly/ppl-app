@@ -32,20 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
-        <AccountProvider>
-          {children}
-        </AccountProvider>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Set theme before page loads to prevent flash
-              (function() {
-                const theme = localStorage.getItem('theme') || 'dark';
-                document.documentElement.className = theme;
-              })();
-            `,
-          }}
-        />
+        <ThemeProvider>
+          <AccountProvider>
+            {children}
+          </AccountProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
