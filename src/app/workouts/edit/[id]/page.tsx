@@ -46,6 +46,13 @@ export default function EditWorkoutPage() {
     }
   }, [user, workoutId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Set loading to false once we have both user and workout data
+  useEffect(() => {
+    if (user && workout) {
+      setLoading(false)
+    }
+  }, [user, workout])
+
   const checkUser = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -106,6 +113,7 @@ export default function EditWorkoutPage() {
     } catch (error) {
       console.error('Error loading workout:', error)
       setError('Failed to load workout')
+      setLoading(false) // Ensure loading is set to false on error
     }
   }
 
@@ -126,9 +134,9 @@ export default function EditWorkoutPage() {
   const getFilteredExercises = () => {
     if (!workout) return []
     
-    // Filter exercises by workout type - exercises now use 'Push', 'Pull', 'Legs' as muscle_group
+    // Filter exercises by workout category (Push/Pull/Legs)
     const filtered = exercises.filter(ex => 
-      ex.muscle_group === workout.type
+      ex.workout_category === workout.type
     )
     
     // Remove duplicates by name

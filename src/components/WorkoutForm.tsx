@@ -630,8 +630,8 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                     // Show exercise search
                                     <ExerciseSearch
                                       exercises={exercises.filter(e => {
-                                        // Filter exercises by workout type - exercises now use 'Push', 'Pull', 'Legs' as muscle_group
-                                        return e.muscle_group === workoutType
+                                        // Filter exercises by workout category (Push/Pull/Legs)
+                                        return e.workout_category === workoutType
                                       }).reduce((acc, current) => {
                                         // Remove duplicates by name
                                         const existing = acc.find(item => item.name === current.name)

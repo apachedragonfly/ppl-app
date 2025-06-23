@@ -78,9 +78,9 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
 
   // Filter exercises by workout type and remove duplicates
   const getFilteredExercises = () => {
-    // Filter exercises by workout type - exercises now use 'Push', 'Pull', 'Legs' as muscle_group
+    // Filter exercises by workout category (Push/Pull/Legs)
     const filtered = availableExercises.filter(ex => 
-      ex.muscle_group === type
+      ex.workout_category === type
     )
     
     // Remove duplicates by name

@@ -19,6 +19,7 @@ export interface Exercise {
   user_id?: string // NULL for global exercises
   name: string
   muscle_group: string
+  workout_category?: string // Push, Pull, or Legs
   created_at: string
   is_favorite?: boolean
   notes?: string
