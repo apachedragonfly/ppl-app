@@ -422,6 +422,12 @@ export default function ExercisesPage() {
           <h1 className="text-3xl font-bold text-foreground">Exercise Management</h1>
           <div className="flex space-x-3">
             <button
+              onClick={() => window.location.href = '/dashboard'}
+              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              ← Dashboard
+            </button>
+            <button
               onClick={() => setShowStats(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
