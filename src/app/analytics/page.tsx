@@ -7,6 +7,7 @@ import WorkoutAnalytics from '@/components/WorkoutAnalytics'
 import WorkoutInsights from '@/components/WorkoutInsights'
 import DataVisualization from '@/components/DataVisualization'
 import Reports from '@/components/Reports'
+import MobileAnalytics from '@/components/MobileAnalytics'
 
 export default function AnalyticsPage() {
   const [user, setUser] = useState<any>(null)
@@ -58,8 +59,8 @@ export default function AnalyticsPage() {
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="border-b border-border mb-6">
+        {/* Tab Navigation - Desktop Only */}
+        <div className="border-b border-border mb-6 hidden md:block">
           <nav className="-mb-px flex space-x-8">
             <button
               onClick={() => setActiveTab('analytics')}
@@ -104,11 +105,18 @@ export default function AnalyticsPage() {
           </nav>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'analytics' && <WorkoutAnalytics userId={user.id} />}
-        {activeTab === 'insights' && <WorkoutInsights userId={user.id} />}
-        {activeTab === 'visualization' && <DataVisualization userId={user.id} />}
-        {activeTab === 'reports' && <Reports userId={user.id} />}
+        {/* Mobile-First Analytics */}
+        <div className="md:hidden">
+          <MobileAnalytics userId={user.id} />
+        </div>
+
+        {/* Desktop Tab Content */}
+        <div className="hidden md:block">
+          {activeTab === 'analytics' && <WorkoutAnalytics userId={user.id} />}
+          {activeTab === 'insights' && <WorkoutInsights userId={user.id} />}
+          {activeTab === 'visualization' && <DataVisualization userId={user.id} />}
+          {activeTab === 'reports' && <Reports userId={user.id} />}
+        </div>
       </div>
     </div>
   )
