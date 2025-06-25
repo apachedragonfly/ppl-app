@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AccountProvider } from "@/contexts/AccountContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import MobileNavigation from "@/components/MobileNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,15 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AccountProvider>
-            {children}
+            <div className="flex flex-col min-h-screen">
+              {/* Mobile Navigation includes desktop header */}
+              <MobileNavigation />
+              
+              {/* Main content area */}
+              <main className="flex-1 pb-16 md:pb-0">
+                {children}
+              </main>
+            </div>
           </AccountProvider>
         </ThemeProvider>
       </body>

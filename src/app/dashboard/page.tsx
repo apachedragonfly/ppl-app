@@ -34,25 +34,28 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-4 sm:py-6 lg:py-8">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-        {/* Header */}
-        <div className="bg-card rounded-lg shadow-lg p-4 sm:p-5 lg:p-6 mb-4 sm:mb-5 lg:mb-6 border border-border">
-          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-              <div className="flex justify-center sm:justify-start">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Mobile-First Header */}
+        <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-border">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+            {/* Main header content */}
+            <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
+              <div className="flex justify-center md:justify-start">
                 <AccountSwitcher />
               </div>
-              <div className="text-center sm:text-left">
-                <h1 className="text-xl sm:text-xl lg:text-2xl font-bold text-foreground mb-1 sm:mb-2">
-                  PPL Tracker Dashboard
+              <div className="text-center md:text-left">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                  PPL Tracker
                 </h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
+                <p className="text-sm md:text-base text-muted-foreground">
                   Welcome back, {currentProfile?.name || currentUser.email}
                 </p>
               </div>
             </div>
-            <div className="flex items-center justify-center sm:justify-end gap-3 sm:gap-4">
+
+            {/* Desktop-only controls (hidden on mobile due to mobile nav) */}
+            <div className="hidden md:flex items-center gap-3">
               <ThemeToggle />
               <GradientMenu />
             </div>
@@ -67,16 +70,38 @@ export default function Dashboard() {
           <SimpleDebugger userId={currentUser.id} />
         </div> */}
 
-        {/* Visual Tracking Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
-          {/* Workout Heatmap - Wider */}
-          <div className="lg:col-span-3 bg-card rounded-lg shadow-lg border border-border order-1">
-            <WorkoutHeatmap userId={currentUser.id} />
+        {/* Mobile-Optimized Layout */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Mobile: Stack vertically, Desktop: Grid layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6">
+            {/* Workout Heatmap - Full width on mobile, wider on desktop */}
+            <div className="xl:col-span-3 bg-card rounded-lg shadow-lg border border-border">
+              <WorkoutHeatmap userId={currentUser.id} />
+            </div>
+
+            {/* Progress Chart - Full width on mobile, narrower on desktop */}
+            <div className="xl:col-span-2 bg-card rounded-lg shadow-lg border border-border">
+              <ChartProgress userId={currentUser.id} />
+            </div>
           </div>
 
-          {/* Progress Chart - Narrower */}
-          <div className="lg:col-span-2 bg-card rounded-lg shadow-lg border border-border order-2">
-            <ChartProgress userId={currentUser.id} />
+          {/* Mobile Quick Actions */}
+          <div className="md:hidden grid grid-cols-2 gap-3">
+            <button
+              onClick={() => window.location.href = '/workouts/new'}
+              className="flex flex-col items-center justify-center p-6 bg-primary text-primary-foreground rounded-lg shadow-lg"
+            >
+              <span className="text-2xl mb-2">💪</span>
+              <span className="font-semibold">Start Workout</span>
+            </button>
+
+            <button
+              onClick={() => window.location.href = '/analytics'}
+              className="flex flex-col items-center justify-center p-6 bg-secondary text-secondary-foreground rounded-lg shadow-lg"
+            >
+              <span className="text-2xl mb-2">📊</span>
+              <span className="font-semibold">View Stats</span>
+            </button>
           </div>
         </div>
       </div>

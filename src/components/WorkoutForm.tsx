@@ -7,6 +7,8 @@ import { Exercise, WorkoutType, WorkoutTemplate, WorkoutTemplateExercise, QuickS
 import { getTodayForDB } from '@/lib/utils'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import ExerciseSearch from '@/components/ExerciseSearch'
+import { TouchNumberInput, QuickSelect, SwipeAction } from '@/components/TouchFriendlyInput'
+import RestTimer from '@/components/RestTimer'
 
 interface WorkoutLog {
   tempId: string
@@ -38,6 +40,7 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [showRestTimer, setShowRestTimer] = useState(false)
 
   useEffect(() => {
     const initializeForm = async () => {
@@ -524,9 +527,30 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
     }
   }
 
-  return (
-          <div className="bg-card border border-border rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-bold text-foreground mb-4">Log Workout</h2>
+    return (
+    <>
+      {/* Rest Timer */}
+      {showRestTimer && (
+        <RestTimer 
+          onClose={() => setShowRestTimer(false)}
+          position="bottom-right"
+        />
+      )}
+
+      <div className="bg-card border border-border rounded-lg shadow-lg p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Log Workout</h2>
+          
+          {/* Mobile Rest Timer Button */}
+          <button
+            type="button"
+            onClick={() => setShowRestTimer(!showRestTimer)}
+            className="sm:hidden flex items-center space-x-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg"
+          >
+            <span className="text-sm">⏱️</span>
+            <span className="text-sm font-medium">Rest</span>
+          </button>
+        </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -830,5 +854,6 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
         </button>
       </form>
     </div>
+    </>
   )
 } 
