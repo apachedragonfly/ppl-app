@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Dumbbell, BarChart3, Target, User } from 'lucide-react'
+import { Home, Dumbbell, BarChart3, Target, User, BookOpen, History } from 'lucide-react'
 
 interface NavItem {
   href: string
@@ -11,7 +11,8 @@ interface NavItem {
   shortLabel: string
 }
 
-const navItems: NavItem[] = [
+// Mobile navigation items (prioritized for bottom nav)
+const mobileNavItems: NavItem[] = [
   {
     href: '/dashboard',
     icon: Home,
@@ -25,16 +26,62 @@ const navItems: NavItem[] = [
     shortLabel: 'Workout'
   },
   {
+    href: '/workouts/history',
+    icon: History,
+    label: 'History',
+    shortLabel: 'History'
+  },
+  {
+    href: '/routines',
+    icon: BookOpen,
+    label: 'Routines',
+    shortLabel: 'Routines'
+  },
+  {
     href: '/analytics',
     icon: BarChart3,
     label: 'Analytics',
     shortLabel: 'Stats'
+  }
+]
+
+// Desktop navigation items (complete list)
+const desktopNavItems: NavItem[] = [
+  {
+    href: '/dashboard',
+    icon: Home,
+    label: 'Dashboard',
+    shortLabel: 'Home'
+  },
+  {
+    href: '/workouts/new',
+    icon: Dumbbell,
+    label: 'New Workout',
+    shortLabel: 'Workout'
+  },
+  {
+    href: '/workouts/history',
+    icon: History,
+    label: 'History',
+    shortLabel: 'History'
+  },
+  {
+    href: '/routines',
+    icon: BookOpen,
+    label: 'Routines',
+    shortLabel: 'Routines'
   },
   {
     href: '/exercises',
     icon: Target,
     label: 'Exercises',
     shortLabel: 'Library'
+  },
+  {
+    href: '/analytics',
+    icon: BarChart3,
+    label: 'Analytics',
+    shortLabel: 'Stats'
   },
   {
     href: '/dashboard/profile',
@@ -59,7 +106,7 @@ export default function MobileNavigation() {
       {/* Bottom Navigation - Mobile Only */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border md:hidden z-50">
         <div className="grid grid-cols-5 h-16">
-          {navItems.map((item) => {
+          {mobileNavItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
             
@@ -81,6 +128,18 @@ export default function MobileNavigation() {
         </div>
       </nav>
 
+      {/* Floating Profile Button - Mobile Only */}
+      <Link
+        href="/dashboard/profile"
+        className={`fixed top-4 right-4 w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center md:hidden z-40 transition-colors ${
+          isActive('/dashboard/profile')
+            ? 'text-primary bg-primary/10 border-primary'
+            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+        }`}
+      >
+        <User className="w-5 h-5" />
+      </Link>
+
       {/* Desktop Navigation - Horizontal Header */}
       <nav className="hidden md:block bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4">
@@ -91,7 +150,7 @@ export default function MobileNavigation() {
               </Link>
               
               <div className="flex items-center space-x-6">
-                {navItems.map((item) => {
+                {desktopNavItems.map((item) => {
                   const Icon = item.icon
                   const active = isActive(item.href)
                   
