@@ -16,10 +16,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PPL Dashboard",
-  description: "Push/Pull/Legs workout tracking dashboard",
+  title: "PPL Tracker",
+  description: "Track your Push, Pull, and Legs workouts with advanced analytics",
+  manifest: "/manifest.json",
   icons: {
     icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "PPL Tracker",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    title: "PPL Tracker",
+    description: "Track your Push, Pull, and Legs workouts with advanced analytics",
+    type: "website",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
   },
 };
 

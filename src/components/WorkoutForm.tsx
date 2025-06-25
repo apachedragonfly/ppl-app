@@ -611,10 +611,18 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`p-4 rounded-lg border border-border ${
-                              snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary'
-                            }`}
                           >
+                            <SwipeAction
+                              onSwipeLeft={() => removeExerciseLog(log.tempId)}
+                              leftAction={{
+                                icon: '🗑️',
+                                label: 'Delete',
+                                color: 'red'
+                              }}
+                            >
+                              <div className={`p-4 rounded-lg border border-border ${
+                                snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary'
+                              }`}>
                             <div className="flex items-start space-x-3">
                               <div
                                 {...provided.dragHandleProps}
@@ -694,67 +702,36 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
 
                                 <div className="grid grid-cols-3 gap-2">
                                   <div>
-                                    <label className="block text-xs font-medium text-foreground mb-1">
-                                      Sets
-                                      {log.last_sets && (
-                                        <span className="text-xs text-muted-foreground ml-1">
-                                          (Last: {log.last_sets})
-                                        </span>
-                                      )}
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={log.sets || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
-                                        updateExerciseLog(log.tempId, 'sets', value)
-                                      }}
-                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                                      min="1"
-                                      required
+                                    <TouchNumberInput
+                                      label={`Sets${log.last_sets ? ` (Last: ${log.last_sets})` : ''}`}
+                                      value={log.sets || 1}
+                                      onChange={(value) => updateExerciseLog(log.tempId, 'sets', value)}
+                                      min={1}
+                                      max={20}
+                                      step={1}
+                                      className="w-full"
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-xs font-medium text-foreground mb-1">
-                                      Reps
-                                      {log.last_reps && (
-                                        <span className="text-xs text-muted-foreground ml-1">
-                                          (Last: {log.last_reps})
-                                        </span>
-                                      )}
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={log.reps || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value === '' ? 1 : parseInt(e.target.value)
-                                        updateExerciseLog(log.tempId, 'reps', value)
-                                      }}
-                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                                      min="1"
-                                      required
+                                    <TouchNumberInput
+                                      label={`Reps${log.last_reps ? ` (Last: ${log.last_reps})` : ''}`}
+                                      value={log.reps || 1}
+                                      onChange={(value) => updateExerciseLog(log.tempId, 'reps', value)}
+                                      min={1}
+                                      max={50}
+                                      step={1}
+                                      className="w-full"
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-xs font-medium text-foreground mb-1">
-                                      Weight (kg)
-                                      {log.last_weight && (
-                                        <span className="text-xs text-muted-foreground ml-1">
-                                          (Last: {log.last_weight}kg)
-                                        </span>
-                                      )}
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={log.weight_kg || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value)
-                                        updateExerciseLog(log.tempId, 'weight_kg', value)
-                                      }}
-                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                                      min="0"
-                                      step="0.5"
-                                      required
+                                    <TouchNumberInput
+                                      label={`Weight (kg)${log.last_weight ? ` (Last: ${log.last_weight}kg)` : ''}`}
+                                      value={log.weight_kg || 0}
+                                      onChange={(value) => updateExerciseLog(log.tempId, 'weight_kg', value)}
+                                      min={0}
+                                      max={500}
+                                      step={0.5}
+                                      className="w-full"
                                     />
                                     {log.last_weight && log.weight_kg !== log.last_weight && (
                                       <div className="text-xs mt-1">
@@ -773,47 +750,21 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                 </div>
 
                                 {/* Advanced Metrics - RPE and RIR */}
-                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                  <div>
-                                    <label className="block text-xs font-medium text-foreground mb-1">
-                                      RPE (1-10)
-                                      <span className="text-xs text-muted-foreground ml-1">
-                                        - How hard?
-                                      </span>
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={log.rpe || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value === '' ? 0 : parseInt(e.target.value)
-                                        updateExerciseLog(log.tempId, 'rpe', value)
-                                      }}
-                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                                      min="1"
-                                      max="10"
-                                      placeholder="Optional"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-medium text-foreground mb-1">
-                                      RIR (0-5)
-                                      <span className="text-xs text-muted-foreground ml-1">
-                                        - Reps left?
-                                      </span>
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={log.rir || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value === '' ? 0 : parseInt(e.target.value)
-                                        updateExerciseLog(log.tempId, 'rir', value)
-                                      }}
-                                      className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-sm focus:outline-none focus:ring-ring focus:border-ring"
-                                      min="0"
-                                      max="5"
-                                      placeholder="Optional"
-                                    />
-                                  </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                  <QuickSelect
+                                    label="RPE (1-10) - How hard?"
+                                    options={[6, 7, 8, 9, 10]}
+                                    value={log.rpe || 0}
+                                    onChange={(value) => updateExerciseLog(log.tempId, 'rpe', value)}
+                                    className="w-full"
+                                  />
+                                  <QuickSelect
+                                    label="RIR (0-5) - Reps left?"
+                                    options={[0, 1, 2, 3, 4, 5]}
+                                    value={log.rir || 0}
+                                    onChange={(value) => updateExerciseLog(log.tempId, 'rir', value)}
+                                    className="w-full"
+                                  />
                                 </div>
                               </div>
 
@@ -825,6 +776,8 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                 ×
                               </button>
                             </div>
+                              </div>
+                            </SwipeAction>
                           </div>
                         )}
                       </Draggable>
