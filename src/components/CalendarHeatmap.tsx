@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import CalendarHeatmap from 'react-calendar-heatmap'
 import { supabase } from '@/lib/supabase'
 import { Workout } from '@/types'
+import { formatDateForDB, parseDateFromDB } from '@/lib/utils'
 import 'react-calendar-heatmap/dist/styles.css'
 
 interface HeatmapValue {
@@ -60,8 +61,8 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
         .from('workouts')
         .select('date, type')
         .eq('user_id', userId)
-        .gte('date', startDate.toISOString().split('T')[0])
-        .lte('date', endDate.toISOString().split('T')[0])
+        .gte('date', formatDateForDB(startDate))
+        .lte('date', formatDateForDB(endDate))
 
       // Apply workout type filter
       if (selectedWorkoutType !== 'all') {
@@ -376,7 +377,7 @@ export default function WorkoutHeatmap({ userId, className = '' }: CalendarHeatm
           <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-lg font-semibold text-card-foreground">
-                Workouts for {new Date(selectedDate).toLocaleDateString('en-US', { 
+                Workouts for {parseDateFromDB(selectedDate).toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   year: 'numeric', 
                   month: 'long', 

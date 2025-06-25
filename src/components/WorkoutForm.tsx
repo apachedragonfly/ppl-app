@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase'
 import { Exercise, WorkoutType, WorkoutTemplate, WorkoutTemplateExercise, QuickStartRoutine, QuickStartRoutineExercise } from '@/types'
+import { getTodayForDB } from '@/lib/utils'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import ExerciseSearch from '@/components/ExerciseSearch'
 
@@ -32,7 +33,7 @@ interface WorkoutFormProps {
 export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFormProps) {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [workoutType, setWorkoutType] = useState<WorkoutType>('Push')
-  const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0])
+  const [workoutDate, setWorkoutDate] = useState(getTodayForDB())
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

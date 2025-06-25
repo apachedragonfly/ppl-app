@@ -9,6 +9,7 @@ import GradientMenu from '@/components/GradientMenu'
 import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
+import SimpleDebugger from '@/components/SimpleDebugger'
 
 export default function Dashboard() {
   const { currentUser, currentProfile, isLoading } = useAccount()
@@ -60,6 +61,11 @@ export default function Dashboard() {
 
         {/* Next Workout Banner */}
         <NextWorkoutBanner userId={currentUser.id} />
+
+        {/* Debug Component - TEMPORARY */}
+        <div className="mb-6">
+          <SimpleDebugger userId={currentUser.id} />
+        </div>
 
         {/* Visual Tracking Components */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">

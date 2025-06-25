@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Exercise, PersonalRecord } from '@/types'
+import { getTodayForDB } from '@/lib/utils'
 
 interface ExerciseNotesProps {
   exercise: Exercise
@@ -26,7 +27,7 @@ export default function ExerciseNotes({ exercise, userId, onClose, onUpdate }: E
     sets: '',
     duration_seconds: '',
     notes: '',
-    achieved_date: new Date().toISOString().split('T')[0]
+    achieved_date: getTodayForDB()
   })
 
   useEffect(() => {
@@ -152,7 +153,7 @@ export default function ExerciseNotes({ exercise, userId, onClose, onUpdate }: E
       sets: '',
       duration_seconds: '',
       notes: '',
-      achieved_date: new Date().toISOString().split('T')[0]
+      achieved_date: getTodayForDB()
     })
   }
 

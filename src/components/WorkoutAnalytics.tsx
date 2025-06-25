@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Workout, Exercise } from '@/types'
+import { formatDateForDB } from '@/lib/utils'
 
 interface WorkoutAnalyticsProps {
   userId?: string
@@ -118,7 +119,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
         .order('date', { ascending: false })
 
       if (startDate) {
-        workoutsQuery = workoutsQuery.gte('date', startDate.toISOString().split('T')[0])
+        workoutsQuery = workoutsQuery.gte('date', formatDateForDB(startDate))
       }
 
       const { data: workouts, error: workoutsError } = await workoutsQuery
@@ -301,7 +302,7 @@ export default function WorkoutAnalytics({ userId }: WorkoutAnalyticsProps) {
       const workoutDate = new Date(workout.date)
       const weekStart = new Date(workoutDate)
       weekStart.setDate(workoutDate.getDate() - workoutDate.getDay())
-      const weekKey = weekStart.toISOString().split('T')[0]
+      const weekKey = formatDateForDB(weekStart)
 
       if (!weeklyData[weekKey]) {
         weeklyData[weekKey] = { workouts: 0, volume: 0, duration: 0 }
