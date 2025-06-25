@@ -33,13 +33,26 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
 
   const fetchAvailableExercises = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
+        .or(`user_id.eq.${user?.id},user_id.is.null`)
         .order('name')
 
       if (error) throw error
-      setAvailableExercises(data || [])
+
+      // Deduplicate exercises by name, preferring user-specific ones
+      const exerciseMap = new Map()
+      data?.forEach(exercise => {
+        const existing = exerciseMap.get(exercise.name)
+        if (!existing || (!existing.user_id && exercise.user_id === user?.id)) {
+          exerciseMap.set(exercise.name, exercise)
+        }
+      })
+
+      const deduplicatedExercises = Array.from(exerciseMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+      setAvailableExercises(deduplicatedExercises)
     } catch (error) {
       console.error('Error fetching exercises:', error)
     }
@@ -49,6 +62,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
     if (!routine) return
 
     try {
+      console.log('RoutineEditor: Fetching routine exercises for routine:', routine.id)
       const { data, error } = await supabase
         .from('routine_exercises')
         .select(`
@@ -59,6 +73,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
         .order('order_index')
 
       if (error) throw error
+      console.log('RoutineEditor: Fetched routine exercises data:', data)
 
       const routineExercises = (data || []).map((re: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
         tempId: re.id,
@@ -70,6 +85,7 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
         exercise: re.exercise
       }))
 
+      console.log('RoutineEditor: Processed routine exercises:', routineExercises)
       setExercises(routineExercises)
     } catch (error) {
       console.error('Error fetching routine exercises:', error)
@@ -78,10 +94,21 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
 
   // Filter exercises by workout type and remove duplicates
   const getFilteredExercises = () => {
+    console.log('RoutineEditor: Filtering exercises for type:', type)
+    console.log('RoutineEditor: Available exercises count:', availableExercises.length)
+    console.log('RoutineEditor: Sample available exercises:', availableExercises.slice(0, 3))
+    
     // Filter exercises by workout category (Push/Pull/Legs)
-    const filtered = availableExercises.filter(ex => 
-      ex.workout_category === type
-    )
+    const filtered = availableExercises.filter(ex => {
+      const matches = ex.workout_category === type
+      if (!matches && ex.name.includes('Bench')) {
+        console.log(`RoutineEditor: Exercise "${ex.name}" filtered out - workout_category: "${ex.workout_category}", type: "${type}"`)
+      }
+      return matches
+    })
+    
+    console.log('RoutineEditor: Filtered exercises count:', filtered.length)
+    console.log('RoutineEditor: Filtered exercise names:', filtered.map(ex => ex.name))
     
     // Remove duplicates by name
     const unique = filtered.reduce((acc, current) => {
@@ -91,6 +118,8 @@ export default function RoutineEditor({ userId, routine, onSave, onCancel }: Rou
       }
       return acc
     }, [] as typeof availableExercises)
+    
+    console.log('RoutineEditor: Unique exercises after deduplication:', unique.length)
     
     return unique.sort((a, b) => a.name.localeCompare(b.name))
   }

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS exercises (
   user_id UUID REFERENCES auth.users ON DELETE CASCADE, -- NULL for global exercises
   name TEXT NOT NULL,
   muscle_group TEXT,
+  workout_category TEXT, -- Push, Pull, or Legs
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -162,25 +163,25 @@ CREATE POLICY "Users can delete own workout logs" ON workout_logs FOR DELETE USI
 );
 
 -- Insert some default exercises
-INSERT INTO exercises (user_id, name, muscle_group) VALUES
-  (NULL, 'Bench Press', 'Chest'),
-  (NULL, 'Incline Dumbbell Press', 'Chest'),
-  (NULL, 'Push-ups', 'Chest'),
-  (NULL, 'Overhead Press', 'Shoulders'),
-  (NULL, 'Lateral Raises', 'Shoulders'),
-  (NULL, 'Tricep Dips', 'Triceps'),
-  (NULL, 'Close-Grip Bench Press', 'Triceps'),
-  (NULL, 'Pull-ups', 'Back'),
-  (NULL, 'Rows', 'Back'),
-  (NULL, 'Lat Pulldowns', 'Back'),
-  (NULL, 'Deadlifts', 'Back'),
-  (NULL, 'Bicep Curls', 'Biceps'),
-  (NULL, 'Hammer Curls', 'Biceps'),
-  (NULL, 'Squats', 'Legs'),
-  (NULL, 'Romanian Deadlifts', 'Legs'),
-  (NULL, 'Leg Press', 'Legs'),
-  (NULL, 'Lunges', 'Legs'),
-  (NULL, 'Calf Raises', 'Legs'),
-  (NULL, 'Leg Curls', 'Legs'),
-  (NULL, 'Leg Extensions', 'Legs')
+INSERT INTO exercises (user_id, name, muscle_group, workout_category) VALUES
+  (NULL, 'Bench Press', 'Chest', 'Push'),
+  (NULL, 'Incline Dumbbell Press', 'Chest', 'Push'),
+  (NULL, 'Push-ups', 'Chest', 'Push'),
+  (NULL, 'Overhead Press', 'Shoulders', 'Push'),
+  (NULL, 'Lateral Raises', 'Shoulders', 'Push'),
+  (NULL, 'Tricep Dips', 'Triceps', 'Push'),
+  (NULL, 'Close-Grip Bench Press', 'Triceps', 'Push'),
+  (NULL, 'Pull-ups', 'Back', 'Pull'),
+  (NULL, 'Rows', 'Back', 'Pull'),
+  (NULL, 'Lat Pulldowns', 'Back', 'Pull'),
+  (NULL, 'Deadlifts', 'Back', 'Pull'),
+  (NULL, 'Bicep Curls', 'Biceps', 'Pull'),
+  (NULL, 'Hammer Curls', 'Biceps', 'Pull'),
+  (NULL, 'Squats', 'Legs', 'Legs'),
+  (NULL, 'Romanian Deadlifts', 'Legs', 'Legs'),
+  (NULL, 'Leg Press', 'Legs', 'Legs'),
+  (NULL, 'Lunges', 'Legs', 'Legs'),
+  (NULL, 'Calf Raises', 'Legs', 'Legs'),
+  (NULL, 'Leg Curls', 'Legs', 'Legs'),
+  (NULL, 'Leg Extensions', 'Legs', 'Legs')
 ON CONFLICT DO NOTHING; 
