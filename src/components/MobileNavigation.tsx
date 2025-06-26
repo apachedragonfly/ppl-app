@@ -104,7 +104,7 @@ export default function MobileNavigation() {
   return (
     <>
       {/* Bottom Navigation - Mobile Only */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border md:hidden z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border md:hidden z-50 pb-safe-area-inset-bottom">
         <div className="grid grid-cols-5 h-16">
           {mobileNavItems.map((item) => {
             const Icon = item.icon
@@ -179,8 +179,8 @@ export default function MobileNavigation() {
         </div>
       </nav>
 
-      {/* Mobile spacing - push content up from bottom nav */}
-      <div className="h-16 md:hidden"></div>
+      {/* Mobile spacing - push content up from bottom nav with safe area */}
+      <div className="h-16 md:hidden pb-safe-area-inset-bottom"></div>
     </>
   )
 } 
