@@ -293,13 +293,12 @@ The app provides a premium mobile experience that rivals native fitness apps whi
 
 🚀 **What's Now Working:**
 
-**Apple Health / Google Fit Integration**
-- Automatic platform detection (iOS shows Apple Health, Android shows Google Fit)
-- Real-time health metrics display (heart rate, steps, calories, weight)
-- Workout data export to health apps with volume and calorie calculations
-- Secure permissions management with granular control
-- Background sync with visual status indicators
-- Comprehensive health metrics storage and visualization
+**Apple Health / Google Fit Integration** *(Disabled - Demo Only)*
+- ~~Automatic platform detection (iOS shows Apple Health, Android shows Google Fit)~~
+- ~~Real-time health metrics display (heart rate, steps, calories, weight)~~
+- ~~Workout data export to health apps with volume and calorie calculations~~
+- *Note: Showed demo data only. Real integration requires native iOS app or complex OAuth setup.*
+- *Code preserved for potential future iOS app conversion.*
 
 **Enhanced Social Feed with Mobile-First Design**
 - Mobile-optimized workout sharing with native share API support
@@ -338,14 +337,14 @@ The app provides a premium mobile experience that rivals native fitness apps whi
 - **Performance**: Optimistic updates for instant feedback on social interactions
 
 🔧 **Technical Improvements:**
-- **Health Data Security**: Encrypted health data storage with user permission controls
+- ~~**Health Data Security**: Encrypted health data storage with user permission controls~~ *(Disabled)*
 - **Social RLS Policies**: Row-level security for all social features
 - **Automated Counters**: Database triggers for real-time like/comment counts
 - **Optimized Queries**: Performance indexes for social feed and leaderboard
 - **Data Relationships**: Proper foreign key relationships with cascade deletes
 
 **🎯 How to Test Phase 5:**
-- **Health Integration**: Connect to health app, view metrics, export workouts
+- ~~**Health Integration**: Connect to health app, view metrics, export workouts~~ *(Disabled)*
 - **Social Sharing**: Share a workout, see it in the community feed
 - **Leaderboard**: Check your ranking against other users
 - **Mobile Features**: Test native sharing, responsive design across devices
@@ -368,7 +367,7 @@ The app provides a premium mobile experience that rivals native fitness apps whi
 
 **PPL Tracker is now a comprehensive fitness ecosystem** with:
 - Native-quality mobile experience across all devices
-- Complete health app integration with data sync
+- ~~Complete health app integration with data sync~~ *(Health integration disabled - demo only)*
 - Thriving social community with workout sharing
 - Advanced analytics and progress tracking
 - Intelligent workout suggestions and notifications

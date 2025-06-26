@@ -11,7 +11,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
 import OfflineSync from '@/components/OfflineSync'
 import SmartNotifications from '@/components/SmartNotifications'
-import HealthIntegration from '@/components/HealthIntegration'
+// import HealthIntegration from '@/components/HealthIntegration' // Disabled - for future iOS app conversion
 import MobileTestingUtils from '@/components/MobileTestingUtils'
 // import SimpleDebugger from '@/components/SimpleDebugger' // Commented out for now
 
@@ -165,10 +165,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Health Integration */}
-          <div className="bg-card rounded-lg shadow-lg border border-border">
+          {/* Health Integration - Disabled for now, keeping for future iOS app conversion */}
+          {/* <div className="bg-card rounded-lg shadow-lg border border-border">
             <HealthIntegration userId={currentUser.id} />
-          </div>
+          </div> */}
 
           {/* Development Testing - Only show in development */}
           {process.env.NODE_ENV === 'development' && (

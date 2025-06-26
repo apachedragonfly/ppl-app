@@ -1,3 +1,8 @@
+// HEALTH INTEGRATION COMPONENT - CURRENTLY DISABLED
+// This component was showing demo/mock data for Apple Health and Google Fit integration.
+// Real integration requires native iOS app for HealthKit or complex OAuth setup for Google Fit.
+// Keeping this code for potential future iOS app conversion.
+
 'use client'
 
 import React, { useState, useEffect } from 'react'

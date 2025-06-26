@@ -1,4 +1,6 @@
 -- Add health integrations table for Apple Health and Google Fit
+-- DISABLED: Health integration commented out for web app, keeping for future iOS app conversion
+/*
 CREATE TABLE IF NOT EXISTS health_integrations (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -101,4 +103,5 @@ SELECT
   '{"heartRate": true, "steps": true, "calories": true, "sleep": true, "weight": true, "workouts": true}'
 FROM auth.users 
 WHERE email IS NOT NULL
-ON CONFLICT (user_id, platform) DO NOTHING; 
+ON CONFLICT (user_id, platform) DO NOTHING;
+*/ 
