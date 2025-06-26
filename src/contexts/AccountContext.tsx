@@ -69,27 +69,29 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return
     
     try {
-      const { data: { user }, error } = await supabase.auth.getUser()
+      // First try to get the current session instead of user
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
-      if (error) {
-        console.error('Auth error in loadCurrentSession:', error)
-        // If there's an auth error, clear any stored session
-        await supabase.auth.signOut()
+      if (sessionError) {
+        console.error('Session error in loadCurrentSession:', sessionError)
+        setCurrentUser(null)
+        setCurrentProfile(null)
+        setIsLoading(false)
         return
       }
       
-      if (user) {
-        setCurrentUser(user)
-        await loadUserProfile(user.id)
+      if (session?.user) {
+        setCurrentUser(session.user)
+        await loadUserProfile(session.user.id)
+      } else {
+        // No session, check if we have stored accounts
+        setCurrentUser(null)
+        setCurrentProfile(null)
       }
     } catch (error) {
       console.error('Error loading current session:', error)
-      // Handle network errors or other issues
-      try {
-        await supabase.auth.signOut()
-      } catch (signOutError) {
-        console.error('Error signing out after failed session load:', signOutError)
-      }
+      setCurrentUser(null)
+      setCurrentProfile(null)
     } finally {
       setIsLoading(false)
     }
@@ -236,7 +238,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Check if account already exists
-        const existingIndex = accounts.findIndex(acc => acc.user.id === data.user.id)
+        const existingIndex = accounts.findIndex(acc => acc.user.id === data.user!.id)
         let updatedAccounts: StoredAccount[]
 
         if (existingIndex >= 0) {

@@ -36,13 +36,14 @@ export const metadata: Metadata = {
     description: "Track your Push, Pull, and Legs workouts with advanced analytics",
     type: "website",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -63,8 +64,18 @@ export default function RootLayout({
               window.addEventListener('unhandledrejection', function(event) {
                 if (event.reason && event.reason.message && 
                     (event.reason.message.includes('Auth') || 
-                     event.reason.message.includes('supabase'))) {
+                     event.reason.message.includes('supabase') ||
+                     event.reason.message.includes('session missing') ||
+                     event.reason.name === 'AuthSessionMissingError')) {
                   console.error('Caught auth error:', event.reason);
+                  event.preventDefault();
+                }
+              });
+              
+              // Also catch general errors
+              window.addEventListener('error', function(event) {
+                if (event.error && event.error.name === 'AuthSessionMissingError') {
+                  console.error('Caught AuthSessionMissingError:', event.error);
                   event.preventDefault();
                 }
               });

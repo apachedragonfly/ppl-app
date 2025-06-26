@@ -14,19 +14,26 @@ export default function Home() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
-        if (error) {
-          console.error('Auth error:', error)
-        }
-        setUser(user)
-        console.log('Authenticated user:', user)
+        // First check if we have a session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        // Redirect authenticated users to dashboard
-        if (user) {
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          setUser(null)
+          setLoading(false)
+          return
+        }
+
+        if (session?.user) {
+          setUser(session.user)
+          console.log('Authenticated user:', session.user)
           router.push('/dashboard')
+        } else {
+          setUser(null)
         }
       } catch (error) {
         console.error('Supabase connection error:', error)
+        setUser(null)
       } finally {
         setLoading(false)
       }
