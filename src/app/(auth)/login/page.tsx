@@ -17,16 +17,24 @@ export default function Login() {
     setLoading(true)
     setError('')
 
+    // Get the actual form values (handles autofill edge cases)
+    const formData = new FormData(e.target as HTMLFormElement)
+    const emailValue = formData.get('email') as string || email
+    const passwordValue = formData.get('password') as string || password
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: emailValue,
+        password: passwordValue,
       })
 
       if (error) {
         setError(error.message)
-      } else {
-        router.push('/dashboard')
+      } else if (data.user) {
+        // Small delay to let auth state sync, then redirect
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 100)
       }
     } catch (error) {
       setError('An unexpected error occurred')
