@@ -112,10 +112,10 @@ export default function AnalyticsPage() {
 
         {/* Desktop Tab Content */}
         <div className="hidden md:block">
-          {activeTab === 'analytics' && <WorkoutAnalytics userId={user.id} />}
-          {activeTab === 'insights' && <WorkoutInsights userId={user.id} />}
-          {activeTab === 'visualization' && <DataVisualization userId={user.id} />}
-          {activeTab === 'reports' && <Reports userId={user.id} />}
+        {activeTab === 'analytics' && <WorkoutAnalytics userId={user.id} />}
+        {activeTab === 'insights' && <WorkoutInsights userId={user.id} />}
+        {activeTab === 'visualization' && <DataVisualization userId={user.id} />}
+        {activeTab === 'reports' && <Reports userId={user.id} />}
         </div>
       </div>
     </div>

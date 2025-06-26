@@ -29,34 +29,37 @@ export default function MobileChart({
   height = 200,
   showControls = true
 }: MobileChartProps) {
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: Math.min(7, data.length) })
+  // Ensure data is always an array and has valid content
+  const safeData = Array.isArray(data) ? data : []
+  
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: Math.min(7, safeData.length) })
   const [touchState, setTouchState] = useState<TouchState | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const visibleData = data.slice(visibleRange.start, visibleRange.end)
+  const visibleData = safeData.slice(visibleRange.start, visibleRange.end)
   const canScrollLeft = visibleRange.start > 0
-  const canScrollRight = visibleRange.end < data.length
+  const canScrollRight = visibleRange.end < safeData.length
   
   // Calculate trend
-  const trend = data.length >= 2 ? (
-    data[data.length - 1][dataKey] - data[data.length - 2][dataKey]
+  const trend = safeData.length >= 2 ? (
+    safeData[safeData.length - 1]?.[dataKey] - safeData[safeData.length - 2]?.[dataKey]
   ) : 0
 
   const scrollLeft = () => {
     if (canScrollLeft) {
-      const newStart = Math.max(0, visibleRange.start - 3)
-      const range = visibleRange.end - visibleRange.start
-      setVisibleRange({ start: newStart, end: newStart + range })
-    }
-  }
+                const newStart = Math.max(0, visibleRange.start - 3)
+          const range = visibleRange.end - visibleRange.start
+          setVisibleRange({ start: newStart, end: newStart + range })
+        }
+      }
 
-  const scrollRight = () => {
-    if (canScrollRight) {
-      const range = visibleRange.end - visibleRange.start
-      const newStart = Math.min(data.length - range, visibleRange.start + 3)
-      setVisibleRange({ start: newStart, end: newStart + range })
-    }
-  }
+      const scrollRight = () => {
+        if (canScrollRight) {
+          const range = visibleRange.end - visibleRange.start
+          const newStart = Math.min(safeData.length - range, visibleRange.start + 3)
+          setVisibleRange({ start: newStart, end: newStart + range })
+        }
+      }
 
   // Touch handlers for swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -145,7 +148,7 @@ export default function MobileChart({
         </div>
 
         {/* Navigation Controls */}
-        {showControls && data.length > 7 && (
+        {showControls && safeData.length > 7 && (
           <div className="flex items-center space-x-2">
             <button
               onClick={scrollLeft}
@@ -252,10 +255,10 @@ export default function MobileChart({
       </div>
 
       {/* Data Range Indicator */}
-      {data.length > 7 && (
+      {safeData.length > 7 && (
         <div className="flex items-center justify-center mt-3">
           <div className="flex space-x-1">
-            {Array.from({ length: Math.ceil(data.length / 7) }, (_, i) => {
+            {Array.from({ length: Math.ceil(safeData.length / 7) }, (_, i) => {
               const isActive = i === Math.floor(visibleRange.start / 7)
               return (
                 <div

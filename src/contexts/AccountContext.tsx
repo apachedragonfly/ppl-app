@@ -29,13 +29,22 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
   const [accounts, setAccounts] = useState<StoredAccount[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    loadStoredAccounts()
-    loadCurrentSession()
+    setMounted(true)
   }, [])
 
+  useEffect(() => {
+    if (mounted) {
+      loadStoredAccounts()
+      loadCurrentSession()
+    }
+  }, [mounted])
+
   const loadStoredAccounts = () => {
+    if (!mounted) return
+    
     try {
       const stored = localStorage.getItem('ppl-accounts')
       if (stored) {
@@ -47,6 +56,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   const saveAccountsToStorage = (accountsToSave: StoredAccount[]) => {
+    if (!mounted) return
+    
     try {
       localStorage.setItem('ppl-accounts', JSON.stringify(accountsToSave))
     } catch (error) {
@@ -55,14 +66,30 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   const loadCurrentSession = async () => {
+    if (!mounted) return
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error } = await supabase.auth.getUser()
+      
+      if (error) {
+        console.error('Auth error in loadCurrentSession:', error)
+        // If there's an auth error, clear any stored session
+        await supabase.auth.signOut()
+        return
+      }
+      
       if (user) {
         setCurrentUser(user)
         await loadUserProfile(user.id)
       }
     } catch (error) {
       console.error('Error loading current session:', error)
+      // Handle network errors or other issues
+      try {
+        await supabase.auth.signOut()
+      } catch (signOutError) {
+        console.error('Error signing out after failed session load:', signOutError)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -70,11 +97,16 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserProfile = async (userId: string) => {
     try {
-      const { data: profileData } = await supabase
+      const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle()
+      
+      if (error) {
+        console.error('Error loading user profile:', error)
+        return null
+      }
       
       if (profileData) {
         setCurrentProfile(profileData)
@@ -87,6 +119,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   const switchToAccount = async (accountId: string) => {
+    if (!mounted) return
+    
     try {
       setIsLoading(true)
       
@@ -101,7 +135,10 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         refresh_token: account.refreshToken
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error switching account:', error)
+        throw error
+      }
 
       if (data.user) {
         setCurrentUser(data.user)
@@ -127,13 +164,18 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   const addAccount = async (email: string, password: string, shouldRegister = false) => {
+    if (!mounted) return
+    
     try {
       setIsLoading(true)
       
       // First, store the current account if it's not already stored
       if (currentUser) {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.error('Error getting current session:', sessionError)
+        } else if (session) {
           const existingAccount = accounts.find(acc => acc.user.id === currentUser.id)
           if (!existingAccount) {
             const currentAccount = {
@@ -169,25 +211,32 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         error = signInResult.error
       }
 
-      if (error) throw error
+      if (error) {
+        console.error('Authentication error:', error)
+        throw error
+      }
 
       if (data?.user && data?.session) {
         // Load the profile for this user
-        const { data: profileData } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', data.user!.id) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          .eq('user_id', data.user.id)
           .maybeSingle()
 
+        if (profileError) {
+          console.error('Error loading profile for new account:', profileError)
+        }
+
         const newAccount: StoredAccount = {
-          user: data.user!,
+          user: data.user,
           profile: profileData,
           accessToken: data.session.access_token,
           refreshToken: data.session.refresh_token
         }
 
         // Check if account already exists
-        const existingIndex = accounts.findIndex(acc => acc.user.id === data.user!.id) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        const existingIndex = accounts.findIndex(acc => acc.user.id === data.user.id)
         let updatedAccounts: StoredAccount[]
 
         if (existingIndex >= 0) {
@@ -203,7 +252,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         saveAccountsToStorage(updatedAccounts)
         
         // Switch to the new account
-        setCurrentUser(data.user!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        setCurrentUser(data.user)
         setCurrentProfile(profileData)
       }
     } catch (error) {
@@ -215,34 +264,55 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   const removeAccount = (accountId: string) => {
-    const updatedAccounts = accounts.filter(acc => acc.user.id !== accountId)
-    setAccounts(updatedAccounts)
-    saveAccountsToStorage(updatedAccounts)
-
-    // If removing current account, switch to first available or logout
-    if (currentUser?.id === accountId) {
-      if (updatedAccounts.length > 0) {
-        switchToAccount(updatedAccounts[0].user.id)
-      } else {
+    if (!mounted) return
+    
+    try {
+      const updatedAccounts = accounts.filter(acc => acc.user.id !== accountId)
+      setAccounts(updatedAccounts)
+      saveAccountsToStorage(updatedAccounts)
+      
+      // If removing current account, sign out
+      if (currentUser?.id === accountId) {
         supabase.auth.signOut()
         setCurrentUser(null)
         setCurrentProfile(null)
       }
+    } catch (error) {
+      console.error('Error removing account:', error)
     }
   }
 
-  const value = {
-    currentUser,
-    currentProfile,
-    accounts,
-    switchToAccount,
-    addAccount,
-    removeAccount,
-    isLoading
+  // Don't provide context until mounted to prevent hydration issues
+  if (!mounted) {
+    return (
+      <AccountContext.Provider
+        value={{
+          currentUser: null,
+          currentProfile: null,
+          accounts: [],
+          switchToAccount: async () => {},
+          addAccount: async () => {},
+          removeAccount: () => {},
+          isLoading: true,
+        }}
+      >
+        {children}
+      </AccountContext.Provider>
+    )
   }
 
   return (
-    <AccountContext.Provider value={value}>
+    <AccountContext.Provider
+      value={{
+        currentUser,
+        currentProfile,
+        accounts,
+        switchToAccount,
+        addAccount,
+        removeAccount,
+        isLoading,
+      }}
+    >
       {children}
     </AccountContext.Provider>
   )

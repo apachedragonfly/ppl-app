@@ -9,6 +9,7 @@ import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import ExerciseSearch from '@/components/ExerciseSearch'
 import { TouchNumberInput, QuickSelect, SwipeAction } from '@/components/TouchFriendlyInput'
 import RestTimer from '@/components/RestTimer'
+import AIWorkoutSuggestions from '@/components/AIWorkoutSuggestions'
 
 interface WorkoutLog {
   tempId: string
@@ -41,11 +42,13 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [showRestTimer, setShowRestTimer] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
     const initializeForm = async () => {
       console.log('Initializing form...')
       await loadExercises()
+      await loadUser()
       console.log('Exercises loaded, length:', exercises.length)
       
       if (templateData) {
@@ -61,6 +64,15 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
     }
     initializeForm()
   }, [templateData])
+
+  const loadUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    } catch (error) {
+      console.error('Error loading user:', error)
+    }
+  }
 
   const loadRoutineFromStorage = async () => {
     try {
@@ -289,6 +301,18 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
       reps: 10,
       weight_kg: 0
     }])
+  }
+
+  const addExerciseFromAI = (exerciseId: string, exerciseName: string, sets: number, reps: number, weight: number) => {
+    const newLog: WorkoutLog = {
+      tempId: `ai-${Date.now()}`,
+      exercise_id: exerciseId,
+      exercise_name: exerciseName,
+      sets: sets,
+      reps: reps,
+      weight_kg: weight
+    }
+    setWorkoutLogs([...workoutLogs, newLog])
   }
 
   const updateExerciseLog = async (tempId: string, field: keyof WorkoutLog, value: string | number) => {
@@ -621,7 +645,7 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                               }}
                             >
                               <div className={`p-4 rounded-lg border border-border ${
-                                snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary'
+                              snapshot.isDragging ? 'shadow-lg bg-accent' : 'bg-secondary'
                               }`}>
                             <div className="flex items-start space-x-3">
                               <div
@@ -764,7 +788,7 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                                     value={log.rir || 0}
                                     onChange={(value) => updateExerciseLog(log.tempId, 'rir', value)}
                                     className="w-full"
-                                  />
+                                    />
                                 </div>
                               </div>
 
@@ -787,6 +811,18 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
                 )}
               </Droppable>
             </DragDropContext>
+          )}
+        </div>
+
+        {/* AI Workout Suggestions */}
+        <div className="mt-6">
+          {user?.id && (
+            <AIWorkoutSuggestions
+              userId={user.id}
+              workoutType={workoutType}
+              onAddExercise={addExerciseFromAI}
+              currentExercises={workoutLogs.map(log => log.exercise_id).filter(Boolean)}
+            />
           )}
         </div>
 

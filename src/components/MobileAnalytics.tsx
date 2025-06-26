@@ -23,10 +23,17 @@ export default function MobileAnalytics({ userId }: MobileAnalyticsProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchAnalyticsData()
+    if (userId) {
+      fetchAnalyticsData()
+    }
   }, [userId])
 
   const fetchAnalyticsData = async () => {
+    if (!userId) {
+      setLoading(false)
+      return
+    }
+    
     try {
       setLoading(true)
       
@@ -239,7 +246,7 @@ export default function MobileAnalytics({ userId }: MobileAnalyticsProps) {
       </div>
 
       {/* Weekly Progress Chart */}
-      {data.weeklyProgress.length > 0 && (
+      {data?.weeklyProgress && data.weeklyProgress.length > 0 && (
         <MobileChart
           data={data.weeklyProgress}
           title="Weekly Workouts"
@@ -251,7 +258,7 @@ export default function MobileAnalytics({ userId }: MobileAnalyticsProps) {
       )}
 
       {/* Volume Progress Chart */}
-      {data.weeklyProgress.length > 0 && (
+      {data?.weeklyProgress && data.weeklyProgress.length > 0 && (
         <MobileChart
           data={data.weeklyProgress}
           title="Weekly Volume (kg)"

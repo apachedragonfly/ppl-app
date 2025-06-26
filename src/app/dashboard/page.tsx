@@ -9,6 +9,10 @@ import GradientMenu from '@/components/GradientMenu'
 import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
+import OfflineSync from '@/components/OfflineSync'
+import SmartNotifications from '@/components/SmartNotifications'
+import HealthIntegration from '@/components/HealthIntegration'
+import MobileTestingUtils from '@/components/MobileTestingUtils'
 // import SimpleDebugger from '@/components/SimpleDebugger' // Commented out for now
 
 export default function Dashboard() {
@@ -147,6 +151,31 @@ export default function Dashboard() {
               <span className="font-semibold">View Stats</span>
             </button>
           </div>
+
+          {/* Phase 4: Advanced Features */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Smart Notifications */}
+            <div className="bg-card rounded-lg shadow-lg border border-border">
+              <SmartNotifications userId={currentUser.id} />
+            </div>
+
+            {/* Offline Sync Status */}
+            <div className="bg-card rounded-lg shadow-lg border border-border">
+              <OfflineSync userId={currentUser.id} />
+            </div>
+          </div>
+
+          {/* Health Integration */}
+          <div className="bg-card rounded-lg shadow-lg border border-border">
+            <HealthIntegration userId={currentUser.id} />
+          </div>
+
+          {/* Development Testing - Only show in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="bg-card rounded-lg shadow-lg border border-border">
+              <MobileTestingUtils />
+            </div>
+          )}
         </div>
       </div>
     </div>

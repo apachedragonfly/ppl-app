@@ -47,24 +47,37 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
-      >
-        <ThemeProvider>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Prevent auth errors from crashing the app
+              window.addEventListener('unhandledrejection', function(event) {
+                if (event.reason && event.reason.message && 
+                    (event.reason.message.includes('Auth') || 
+                     event.reason.message.includes('supabase'))) {
+                  console.error('Caught auth error:', event.reason);
+                  event.preventDefault();
+                }
+              });
+            `
+          }}
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AccountProvider>
-            <div className="flex flex-col min-h-screen">
-              {/* Mobile Navigation includes desktop header */}
+            <div className="relative min-h-screen bg-background">
+              {children}
               <MobileNavigation />
-              
-              {/* Main content area */}
-              <main className="flex-1 pb-16 md:pb-0">
-                {children}
-              </main>
             </div>
           </AccountProvider>
         </ThemeProvider>
