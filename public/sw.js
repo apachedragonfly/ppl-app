@@ -7,8 +7,7 @@ const urlsToCache = [
   '/analytics',
   '/static/js/bundle.js',
   '/static/css/main.css',
-  '/icon.svg',
-  '/icon-512x512.png'
+  '/icon.svg'
 ]
 
 // Install event
@@ -75,8 +74,7 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'New workout reminder!',
-          icon: '/icon.svg',
-    badge: '/icon-72x72.png',
+    icon: '/icon.svg',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
