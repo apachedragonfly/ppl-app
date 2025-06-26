@@ -39,6 +39,25 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     if (mounted) {
       loadStoredAccounts()
       loadCurrentSession()
+      
+      // Listen for auth state changes (important for PWA)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state changed:', event, session?.user?.id)
+          
+          if (event === 'SIGNED_IN' && session?.user) {
+            setCurrentUser(session.user)
+            await loadUserProfile(session.user.id)
+          } else if (event === 'SIGNED_OUT') {
+            setCurrentUser(null)
+            setCurrentProfile(null)
+          }
+        }
+      )
+      
+      return () => {
+        subscription.unsubscribe()
+      }
     }
   }, [mounted])
 

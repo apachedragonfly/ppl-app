@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { handlePWAAuthRedirect, isPWA } from '@/lib/pwa-utils'
 import Link from 'next/link'
 
 export default function Login() {
@@ -31,10 +32,15 @@ export default function Login() {
       if (error) {
         setError(error.message)
       } else if (data.user) {
-        // Small delay to let auth state sync, then redirect
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 100)
+        // Handle PWA authentication redirect properly
+        if (isPWA()) {
+          await handlePWAAuthRedirect('/dashboard')
+        } else {
+          // Regular browser - small delay then navigate
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 100)
+        }
       }
     } catch (error) {
       setError('An unexpected error occurred')

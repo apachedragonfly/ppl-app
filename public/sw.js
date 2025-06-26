@@ -24,6 +24,20 @@ self.addEventListener('install', (event) => {
 
 // Fetch event
 self.addEventListener('fetch', (event) => {
+  // Don't cache authentication or API requests
+  const url = new URL(event.request.url)
+  const isAuthRequest = url.pathname.includes('/auth/') || 
+                       url.pathname.includes('/api/') ||
+                       url.hostname.includes('supabase.co') ||
+                       url.hostname.includes('supabase.in') ||
+                       event.request.method !== 'GET'
+
+  if (isAuthRequest) {
+    // Always fetch from network for auth/API requests
+    event.respondWith(fetch(event.request))
+    return
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -31,7 +45,21 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response
         }
-        return fetch(event.request)
+        return fetch(event.request).then((response) => {
+          // Don't cache if it's an error response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response
+          }
+
+          // Clone the response for caching
+          const responseToCache = response.clone()
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache)
+            })
+
+          return response
+        })
       })
   )
 })
