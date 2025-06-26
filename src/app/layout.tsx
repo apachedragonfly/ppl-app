@@ -57,31 +57,6 @@ export default function RootLayout({
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Prevent auth errors from crashing the app
-              window.addEventListener('unhandledrejection', function(event) {
-                if (event.reason && event.reason.message && 
-                    (event.reason.message.includes('Auth') || 
-                     event.reason.message.includes('supabase') ||
-                     event.reason.message.includes('session missing') ||
-                     event.reason.name === 'AuthSessionMissingError')) {
-                  console.error('Caught auth error:', event.reason);
-                  event.preventDefault();
-                }
-              });
-              
-              // Also catch general errors
-              window.addEventListener('error', function(event) {
-                if (event.error && event.error.name === 'AuthSessionMissingError') {
-                  console.error('Caught AuthSessionMissingError:', event.error);
-                  event.preventDefault();
-                }
-              });
-            `
-          }}
-        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

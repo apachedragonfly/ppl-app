@@ -7,7 +7,7 @@ const urlsToCache = [
   '/analytics',
   '/static/js/bundle.js',
   '/static/css/main.css',
-  '/icon-192x192.png',
+  '/icon.svg',
   '/icon-512x512.png'
 ]
 
@@ -75,7 +75,7 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'New workout reminder!',
-    icon: '/icon-192x192.png',
+          icon: '/icon.svg',
     badge: '/icon-72x72.png',
     vibrate: [100, 50, 100],
     data: {
@@ -86,12 +86,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'start-workout',
         title: 'Start Workout',
-        icon: '/icon-192x192.png'
+        icon: '/icon.svg'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icon-192x192.png'
+        icon: '/icon.svg'
       }
     ]
   }

@@ -115,7 +115,7 @@ export default function SmartNotifications({ userId }: { userId: string }) {
       if (permission === 'granted') {
         new Notification('PPL Tracker', {
           body: 'Smart notifications enabled! You\'ll receive workout reminders and achievements.',
-          icon: '/icon-192x192.png'
+          icon: '/icon.svg'
         })
       }
     } catch (error) {
@@ -226,7 +226,7 @@ export default function SmartNotifications({ userId }: { userId: string }) {
     if (Notification.permission === 'granted') {
       new Notification(notification.title, {
         body: notification.message,
-        icon: '/icon-192x192.png'
+        icon: '/icon.svg'
       })
     }
   }

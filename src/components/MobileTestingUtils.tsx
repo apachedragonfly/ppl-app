@@ -114,7 +114,7 @@ export default function MobileTestingUtils() {
     if (permission === 'granted') {
       new Notification('PPL Tracker Test', {
         body: 'Push notifications working! 🎉',
-        icon: '/icon-192x192.png'
+                  icon: '/icon.svg'
       })
     }
   }

@@ -24,6 +24,49 @@ interface AccountContextType {
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined)
 
+// Error boundary for context provider
+class AccountContextErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    console.error('AccountContext error:', error)
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('AccountContext error caught:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold mb-2">Authentication Error</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              There was an issue with the authentication system. Please refresh the page.
+            </p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
 export function AccountProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
@@ -323,26 +366,52 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AccountContext.Provider
-      value={{
-        currentUser,
-        currentProfile,
-        accounts,
-        switchToAccount,
-        addAccount,
-        removeAccount,
-        isLoading,
-      }}
-    >
-      {children}
-    </AccountContext.Provider>
+    <AccountContextErrorBoundary>
+      <AccountContext.Provider
+        value={{
+          currentUser,
+          currentProfile,
+          accounts,
+          switchToAccount,
+          addAccount,
+          removeAccount,
+          isLoading,
+        }}
+      >
+        {children}
+      </AccountContext.Provider>
+    </AccountContextErrorBoundary>
   )
 }
 
-export function useAccount() {
-  const context = useContext(AccountContext)
-  if (context === undefined) {
-    throw new Error('useAccount must be used within an AccountProvider')
+export function useAccount(): AccountContextType {
+  try {
+    const context = useContext(AccountContext)
+    if (context === undefined) {
+      console.error('useAccount called outside of AccountProvider')
+      // Return safe defaults instead of throwing
+      return {
+        currentUser: null,
+        currentProfile: null,
+        accounts: [],
+        switchToAccount: async () => {},
+        addAccount: async () => {},
+        removeAccount: () => {},
+        isLoading: false
+      }
+    }
+    return context
+  } catch (error) {
+    console.error('Error in useAccount hook:', error)
+    // Return safe defaults
+    return {
+      currentUser: null,
+      currentProfile: null,
+      accounts: [],
+      switchToAccount: async () => {},
+      addAccount: async () => {},
+      removeAccount: () => {},
+      isLoading: false
+    }
   }
-  return context
 } 
