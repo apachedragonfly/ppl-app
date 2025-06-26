@@ -199,7 +199,10 @@ export default function AIWorkoutSuggestions({
       )
       
       if (muscleExercises.length > 0) {
-        const popularExercise = muscleExercises[Math.floor(Math.random() * Math.min(3, muscleExercises.length))]
+        // Use muscle name as seed for consistent exercise selection
+        const seed = muscle.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        const exerciseIndex = seed % Math.min(3, muscleExercises.length)
+        const popularExercise = muscleExercises[exerciseIndex]
         
         suggestions.push({
           id: popularExercise.id,

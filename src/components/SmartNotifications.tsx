@@ -185,7 +185,11 @@ export default function SmartNotifications({ userId }: { userId: string }) {
           'Your future self will thank you for today\'s effort! ⭐'
         ]
         
-        const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
+        // Use date as seed for consistent daily message
+        const today = new Date().toDateString()
+        const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        const messageIndex = seed % motivationalMessages.length
+        const randomMessage = motivationalMessages[messageIndex]
         
         newNotifications.push({
           id: `motivation_${Date.now()}`,

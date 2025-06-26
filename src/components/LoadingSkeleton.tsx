@@ -73,11 +73,11 @@ function renderVariant(variant: string) {
         <>
           <div className="h-6 bg-muted rounded w-1/3 mb-4"></div>
           <div className="flex items-end space-x-2 h-40">
-            {Array.from({ length: 7 }, (_, i) => (
+            {[60, 85, 40, 70, 95, 55, 75].map((height, i) => (
               <div
                 key={i}
                 className="flex-1 bg-muted rounded-t"
-                style={{ height: `${Math.random() * 80 + 20}%` }}
+                style={{ height: `${height}%` }}
               ></div>
             ))}
           </div>

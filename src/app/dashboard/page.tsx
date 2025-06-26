@@ -61,11 +61,11 @@ export default function Dashboard() {
               <div className="xl:col-span-2 bg-card rounded-lg shadow-lg border border-border p-6 animate-pulse">
                 <div className="h-6 bg-muted rounded w-2/3 mb-4"></div>
                 <div className="flex items-end space-x-2 h-40">
-                  {Array.from({ length: 5 }, (_, i) => (
+                  {[65, 80, 45, 90, 55].map((height, i) => (
                     <div
                       key={i}
                       className="flex-1 bg-muted rounded-t"
-                      style={{ height: `${Math.random() * 80 + 20}%` }}
+                      style={{ height: `${height}%` }}
                     ></div>
                   ))}
                 </div>
