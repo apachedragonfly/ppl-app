@@ -159,10 +159,10 @@ export default function Dashboard() {
               <SmartNotifications userId={currentUser.id} />
             </div>
 
-            {/* Offline Sync Status */}
-            <div className="bg-card rounded-lg shadow-lg border border-border">
+            {/* Offline Sync Status - Commented Out */}
+            {/* <div className="bg-card rounded-lg shadow-lg border border-border">
               <OfflineSync userId={currentUser.id} />
-            </div>
+            </div> */}
           </div>
 
           {/* Health Integration - Disabled for now, keeping for future iOS app conversion */}
