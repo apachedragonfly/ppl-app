@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Home, Dumbbell, BarChart3, Target, User, BookOpen, History } from 'lucide-react'
+import { ThemeToggle } from './ThemeToggle'
 
 interface NavItem {
   href: string
@@ -173,7 +174,7 @@ export default function MobileNavigation() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Theme toggle and other controls will go here */}
+              <ThemeToggle />
             </div>
           </div>
         </div>

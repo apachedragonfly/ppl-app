@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useAccount } from '@/contexts/AccountContext'
 import WorkoutHeatmap from '@/components/CalendarHeatmap'
 import ChartProgress from '@/components/ChartProgress'
-import GradientMenu from '@/components/GradientMenu'
 import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
@@ -105,7 +104,6 @@ export default function Dashboard() {
             {/* Desktop-only controls (hidden on mobile due to mobile nav) */}
             <div className="hidden md:flex items-center gap-3">
               <ThemeToggle />
-              <GradientMenu />
             </div>
           </div>
         </div>
