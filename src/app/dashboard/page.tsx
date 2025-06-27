@@ -170,12 +170,12 @@ export default function Dashboard() {
             <HealthIntegration userId={currentUser.id} />
           </div> */}
 
-          {/* Development Testing - Only show in development */}
-          {process.env.NODE_ENV === 'development' && (
+          {/* Development Testing - Only show in development - Commented Out */}
+          {/* {process.env.NODE_ENV === 'development' && (
             <div className="bg-card rounded-lg shadow-lg border border-border">
               <MobileTestingUtils />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
