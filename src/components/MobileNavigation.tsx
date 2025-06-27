@@ -142,7 +142,7 @@ export default function MobileNavigation() {
       </Link>
 
       {/* Desktop Navigation - Horizontal Header */}
-      <nav className="hidden md:block bg-card border-b border-border sticky top-0 z-50">
+      <nav className="hidden md:block bg-card/95 backdrop-blur-sm border-b border-border fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
@@ -180,8 +180,8 @@ export default function MobileNavigation() {
         </div>
       </nav>
 
-      {/* Mobile spacing - push content up from bottom nav with safe area */}
-      <div className="h-16 md:hidden pb-safe-area-inset-bottom"></div>
+      {/* Spacing for fixed navigation */}
+      <div className="h-16 md:block pb-safe-area-inset-bottom md:pb-0"></div>
     </>
   )
 } 

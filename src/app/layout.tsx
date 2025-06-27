@@ -62,8 +62,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AccountProvider>
             <div className="relative min-h-screen bg-background">
-              {children}
               <MobileNavigation />
+              {children}
             </div>
           </AccountProvider>
         </ThemeProvider>

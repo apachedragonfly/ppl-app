@@ -83,19 +83,16 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Mobile-First Header */}
+        {/* Header with Account Switcher */}
         <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-border">
           <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
-            {/* Main header content */}
+            {/* Account switcher and welcome message */}
             <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
               <div className="flex justify-center md:justify-start">
                 <AccountSwitcher />
               </div>
               <div className="text-center md:text-left">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-                  PPL Tracker
-                </h1>
-                <p className="text-sm md:text-base text-muted-foreground">
+                <p className="text-lg md:text-xl text-foreground font-medium">
                   Welcome back, {currentProfile?.name || currentUser.email}
                 </p>
               </div>
