@@ -9,7 +9,7 @@ import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import ExerciseSearch from '@/components/ExerciseSearch'
 import { TouchNumberInput, QuickSelect, SwipeAction } from '@/components/TouchFriendlyInput'
 import RestTimer from '@/components/RestTimer'
-import AIWorkoutSuggestions from '@/components/AIWorkoutSuggestions'
+
 
 interface WorkoutLog {
   tempId: string
@@ -303,17 +303,7 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
     }])
   }
 
-  const addExerciseFromAI = (exerciseId: string, exerciseName: string, sets: number, reps: number, weight: number) => {
-    const newLog: WorkoutLog = {
-      tempId: `ai-${Date.now()}`,
-      exercise_id: exerciseId,
-      exercise_name: exerciseName,
-      sets: sets,
-      reps: reps,
-      weight_kg: weight
-    }
-    setWorkoutLogs([...workoutLogs, newLog])
-  }
+
 
   const updateExerciseLog = async (tempId: string, field: keyof WorkoutLog, value: string | number) => {
     const updated = workoutLogs.map(log => {
@@ -814,17 +804,7 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
           )}
         </div>
 
-        {/* AI Workout Suggestions */}
-        <div className="mt-6">
-          {user?.id && (
-            <AIWorkoutSuggestions
-              userId={user.id}
-              workoutType={workoutType}
-              onAddExercise={addExerciseFromAI}
-              currentExercises={workoutLogs.map(log => log.exercise_id).filter(Boolean)}
-            />
-          )}
-        </div>
+
 
         {error && (
           <div className="text-destructive text-sm">{error}</div>
