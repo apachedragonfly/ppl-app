@@ -64,15 +64,20 @@ export default function ExerciseHistory({ exercise, userId, onClose }: ExerciseH
           dateFilter = new Date('2020-01-01') // All time
       }
 
-      // Get workout logs for this exercise
+      console.log('Loading exercise history for:', exercise.name, 'userId:', userId)
+      console.log('Date filter:', dateFilter.toISOString().split('T')[0])
+
+      // Get workout logs for this exercise with simplified query first
       const { data: workoutLogs, error } = await supabase
         .from('workout_logs')
         .select(`
+          id,
           sets,
           reps,
           weight_kg,
           workout_id,
           workouts!inner(
+            id,
             date,
             type,
             user_id
@@ -81,19 +86,20 @@ export default function ExerciseHistory({ exercise, userId, onClose }: ExerciseH
         .eq('exercise_id', exercise.id)
         .eq('workouts.user_id', userId)
         .gte('workouts.date', dateFilter.toISOString().split('T')[0])
-        .order('workouts.date', { ascending: false })
+
+      console.log('Query result:', { workoutLogs, error })
 
       if (error) throw error
 
-      // Transform data
-      const historyData: ExerciseHistoryData[] = workoutLogs?.map(log => ({
+      // Transform data and sort by date (newest first)
+      const historyData: ExerciseHistoryData[] = (workoutLogs?.map(log => ({
         date: (log as any).workouts.date,
         workout_type: (log as any).workouts.type,
         sets: log.sets,
         reps: log.reps,
         weight_kg: log.weight_kg,
         workout_id: log.workout_id
-      })) || []
+      })) || []).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
       setHistory(historyData)
 
@@ -142,6 +148,7 @@ export default function ExerciseHistory({ exercise, userId, onClose }: ExerciseH
 
         setStats(statsData)
       } else {
+        console.log('No history data found, setting stats to null')
         setStats(null)
       }
     } catch (error) {

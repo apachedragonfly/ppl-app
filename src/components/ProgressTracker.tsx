@@ -67,37 +67,36 @@ export default function ProgressTracker({ exercise, onClose }: ProgressTrackerPr
         .select(`
           *,
           workouts!inner (
-            workout_date,
+            date,
             user_id
           )
         `)
         .eq('exercise_id', exercise.id)
         .eq('workouts.user_id', user.id)
-        .order('workouts(workout_date)', { ascending: true })
 
       if (startDate) {
-        query = query.gte('workouts.workout_date', startDate.toISOString().split('T')[0])
+        query = query.gte('workouts.date', startDate.toISOString().split('T')[0])
       }
 
       const { data: logs, error: logsError } = await query
 
       if (logsError) throw logsError
 
-      // Process data for charting
-      const processedData: ProgressData[] = logs?.map(log => {
+      // Process data for charting and sort by date (oldest first for charts)
+      const processedData: ProgressData[] = (logs?.map(log => {
         const volume = log.sets * log.reps * log.weight_kg
         // Estimate 1RM using Epley formula: weight * (1 + reps/30)
         const oneRepMax = log.weight_kg * (1 + log.reps / 30)
 
         return {
-          date: log.workouts.workout_date,
+          date: log.workouts.date,
           weight: log.weight_kg,
           sets: log.sets,
           reps: log.reps,
           volume,
           oneRepMax
         }
-      }) || []
+      }) || []).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
       setProgressData(processedData)
     } catch (error) {

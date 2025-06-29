@@ -101,7 +101,6 @@ export default function ChartProgress({ userId, exerciseId, className = '' }: Ch
           exercise:exercises(name)
         `)
         .eq('exercise_id', selectedExercise)
-        .order('workout(date)', { ascending: true })
 
       if (error) throw error
 

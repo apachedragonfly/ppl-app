@@ -102,7 +102,6 @@ export default function DataVisualization({ userId }: DataVisualizationProps) {
         `)
         .eq('workouts.user_id', userId)
         .gte('workouts.date', startDate)
-        .order('workouts.date')
 
       if (error) throw error
 

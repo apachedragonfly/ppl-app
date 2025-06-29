@@ -74,10 +74,9 @@ export default function ExerciseComparison({ exercises, userId, onClose }: Exerc
               user_id
             )
           `)
-          .eq('exercise_id', exercise.id)
-          .eq('workouts.user_id', userId)
-          .gte('workouts.date', dateFilter.toISOString().split('T')[0])
-          .order('workouts.date', { ascending: false })
+                  .eq('exercise_id', exercise.id)
+        .eq('workouts.user_id', userId)
+        .gte('workouts.date', dateFilter.toISOString().split('T')[0])
 
         if (logsError) throw logsError
 
@@ -91,15 +90,15 @@ export default function ExerciseComparison({ exercises, userId, onClose }: Exerc
 
         if (prError) throw prError
 
-        // Calculate statistics
-        const historyData = workoutLogs?.map(log => ({
+        // Calculate statistics - sort by date (newest first)
+        const historyData = (workoutLogs?.map(log => ({
           date: (log as any).workouts.date,
           workout_type: (log as any).workouts.type,
           sets: log.sets,
           reps: log.reps,
           weight_kg: log.weight_kg,
           workout_id: log.workout_id
-        })) || []
+        })) || []).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
         let exerciseStat: ExerciseStats = {
           exercise,

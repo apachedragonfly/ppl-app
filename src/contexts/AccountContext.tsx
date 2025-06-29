@@ -35,12 +35,18 @@ class AccountContextErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error) {
-    console.error('AccountContext error:', error)
+    // Only log in development mode to avoid console errors in production
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('AccountContext error:', error)
+    }
     return { hasError: true }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('AccountContext error caught:', error, errorInfo)
+    // Only log in development mode to avoid console errors in production
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('AccountContext error caught:', error, errorInfo)
+    }
   }
 
   render() {
@@ -113,7 +119,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         setAccounts(JSON.parse(stored))
       }
     } catch (error) {
-      console.error('Error loading stored accounts:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error loading stored accounts:', error)
+      }
     }
   }
 
@@ -123,7 +131,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem('ppl-accounts', JSON.stringify(accountsToSave))
     } catch (error) {
-      console.error('Error saving accounts:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error saving accounts:', error)
+      }
     }
   }
 
@@ -135,7 +145,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (sessionError) {
-        console.error('Session error in loadCurrentSession:', sessionError)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Session error in loadCurrentSession:', sessionError)
+        }
         setCurrentUser(null)
         setCurrentProfile(null)
         setIsLoading(false)
@@ -151,7 +163,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         setCurrentProfile(null)
       }
     } catch (error) {
-      console.error('Error loading current session:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error loading current session:', error)
+      }
       setCurrentUser(null)
       setCurrentProfile(null)
     } finally {
@@ -168,7 +182,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle()
       
       if (error) {
-        console.error('Error loading user profile:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Error loading user profile:', error)
+        }
         return null
       }
       
@@ -177,7 +193,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       }
       return profileData
     } catch (error) {
-      console.error('Error loading profile:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error loading profile:', error)
+      }
       return null
     }
   }
@@ -200,7 +218,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (error) {
-        console.error('Error switching account:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Error switching account:', error)
+        }
         throw error
       }
 
@@ -220,7 +240,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error) {
-      console.error('Error switching account:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error switching account:', error)
+      }
       alert('Failed to switch account. You may need to re-add this account.')
     } finally {
       setIsLoading(false)
@@ -238,7 +260,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
-          console.error('Error getting current session:', sessionError)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Error getting current session:', sessionError)
+          }
         } else if (session) {
           const existingAccount = accounts.find(acc => acc.user.id === currentUser.id)
           if (!existingAccount) {
@@ -276,7 +300,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (error) {
-        console.error('Authentication error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Authentication error:', error)
+        }
         throw error
       }
 
@@ -289,7 +315,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle()
 
         if (profileError) {
-          console.error('Error loading profile for new account:', profileError)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Error loading profile for new account:', profileError)
+          }
         }
 
         const newAccount: StoredAccount = {
@@ -320,7 +348,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         setCurrentProfile(profileData)
       }
     } catch (error) {
-      console.error('Error adding account:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error adding account:', error)
+      }
       throw error
     } finally {
       setIsLoading(false)
@@ -342,7 +372,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         setCurrentProfile(null)
       }
     } catch (error) {
-      console.error('Error removing account:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error removing account:', error)
+      }
     }
   }
 
@@ -388,7 +420,10 @@ export function useAccount(): AccountContextType {
   try {
     const context = useContext(AccountContext)
     if (context === undefined) {
-      console.error('useAccount called outside of AccountProvider')
+      // Only log in development mode to avoid console errors in production
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('useAccount called outside of AccountProvider')
+      }
       // Return safe defaults instead of throwing
       return {
         currentUser: null,
@@ -402,7 +437,10 @@ export function useAccount(): AccountContextType {
     }
     return context
   } catch (error) {
-    console.error('Error in useAccount hook:', error)
+    // Only log in development mode to avoid console errors in production
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error in useAccount hook:', error)
+    }
     // Return safe defaults
     return {
       currentUser: null,
