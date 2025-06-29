@@ -76,7 +76,7 @@ export default function ExercisesPage() {
         setCurrentUserId(user.id)
       }
       
-      // Get exercises (temporarily without favorites until table is created)
+      // Get exercises
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
@@ -84,6 +84,19 @@ export default function ExercisesPage() {
         .order('name')
 
       if (error) throw error
+
+      // Get user's favorites if logged in
+      let userFavorites: Set<string> = new Set()
+      if (user?.id) {
+        const { data: favoritesData } = await supabase
+          .from('exercise_favorites')
+          .select('exercise_id')
+          .eq('user_id', user.id)
+        
+        if (favoritesData) {
+          userFavorites = new Set(favoritesData.map(fav => fav.exercise_id))
+        }
+      }
 
       // Transform database format to interface format
       const transformedExercises = data?.map(exercise => ({
@@ -95,8 +108,8 @@ export default function ExercisesPage() {
           primary: exercise.muscles_worked.primary || [],
           secondary: exercise.muscles_worked.secondary || []
         } : undefined,
-        // Temporarily set favorites to false until table is created
-        is_favorite: false
+        // Check if this exercise is favorited by the current user
+        is_favorite: userFavorites.has(exercise.id)
       })) || []
 
       // Deduplicate exercises by name, preferring user-specific ones
