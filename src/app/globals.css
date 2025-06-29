@@ -174,4 +174,9 @@
   .mb-safe-area-inset-bottom {
     margin-bottom: env(safe-area-inset-bottom);
   }
+  
+  /* Mobile content padding for bottom navigation */
+  .pb-mobile-nav {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
 }

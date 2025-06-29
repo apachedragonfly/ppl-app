@@ -63,7 +63,9 @@ export default function RootLayout({
           <AccountProvider>
             <div className="relative min-h-screen bg-background">
               <MobileNavigation />
-              {children}
+              <main className="pb-mobile-nav md:pb-0 pt-0 md:pt-16">
+                {children}
+              </main>
             </div>
           </AccountProvider>
         </ThemeProvider>

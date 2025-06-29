@@ -9,7 +9,7 @@ import AccountSwitcher from '@/components/AccountSwitcher'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import NextWorkoutBanner from '@/components/NextWorkoutBanner'
 import OfflineSync from '@/components/OfflineSync'
-import SmartNotifications from '@/components/SmartNotifications'
+// import SmartNotifications from '@/components/SmartNotifications' // Commented out for now
 // import HealthIntegration from '@/components/HealthIntegration' // Disabled - for future iOS app conversion
 import MobileTestingUtils from '@/components/MobileTestingUtils'
 // import SimpleDebugger from '@/components/SimpleDebugger' // Commented out for now
@@ -129,36 +129,27 @@ export default function Dashboard() {
           </div>
 
           {/* Mobile Quick Actions */}
-          <div className="md:hidden grid grid-cols-2 gap-3">
+          <div className="md:hidden flex justify-center">
             <button
-              onClick={() => window.location.href = '/workouts/new'}
-              className="flex flex-col items-center justify-center p-6 bg-primary text-primary-foreground rounded-lg shadow-lg"
+              onClick={() => window.location.href = '/exercises'}
+              className="flex flex-col items-center justify-center p-6 bg-primary text-primary-foreground rounded-lg shadow-lg w-full max-w-sm"
             >
-              <span className="text-2xl mb-2">💪</span>
-              <span className="font-semibold">Start Workout</span>
-            </button>
-
-            <button
-              onClick={() => window.location.href = '/analytics'}
-              className="flex flex-col items-center justify-center p-6 bg-secondary text-secondary-foreground rounded-lg shadow-lg"
-            >
-              <span className="text-2xl mb-2">📊</span>
-              <span className="font-semibold">View Stats</span>
+              <span className="text-2xl mb-2">🏋️</span>
+              <span className="font-semibold">Exercises</span>
             </button>
           </div>
 
           {/* Phase 4: Advanced Features */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Smart Notifications */}
+          {/* Smart Notifications - Commented out for now */}
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div className="bg-card rounded-lg shadow-lg border border-border">
               <SmartNotifications userId={currentUser.id} />
             </div>
 
-            {/* Offline Sync Status - Commented Out */}
-            {/* <div className="bg-card rounded-lg shadow-lg border border-border">
+            <div className="bg-card rounded-lg shadow-lg border border-border">
               <OfflineSync userId={currentUser.id} />
-            </div> */}
-          </div>
+            </div>
+          </div> */}
 
           {/* Health Integration - Disabled for now, keeping for future iOS app conversion */}
           {/* <div className="bg-card rounded-lg shadow-lg border border-border">

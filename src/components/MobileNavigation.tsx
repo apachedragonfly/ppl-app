@@ -180,8 +180,7 @@ export default function MobileNavigation() {
         </div>
       </nav>
 
-      {/* Spacing for fixed navigation */}
-      <div className="h-16 md:block pb-safe-area-inset-bottom md:pb-0"></div>
+
     </>
   )
 } 
