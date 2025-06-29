@@ -53,13 +53,26 @@ export default function ExerciseStats({ userId }: ExerciseStatsProps) {
           dateFilter = new Date('2020-01-01') // All time
       }
 
-      // Get workout data with exercise information
-      const { data: workoutData, error } = await supabase
-        .from('workouts')
-        .select('id, created_at, exercises(id, name, sets, reps, weight)')
-        .eq('user_id', userId)
-        .gte('created_at', dateFilter.toISOString())
-        .order('created_at', { ascending: false })
+      // Get workout logs with exercise and workout information
+      const { data: workoutLogs, error } = await supabase
+        .from('workout_logs')
+        .select(`
+          sets,
+          reps,
+          weight_kg,
+          workouts!inner(
+            id,
+            user_id,
+            date,
+            created_at
+          ),
+          exercises!inner(
+            id,
+            name
+          )
+        `)
+        .eq('workouts.user_id', userId)
+        .gte('workouts.created_at', dateFilter.toISOString())
 
       if (error) throw error
 
@@ -75,40 +88,41 @@ export default function ExerciseStats({ userId }: ExerciseStatsProps) {
         firstPerformed: string
       }>()
 
-      workoutData?.forEach(workout => {
-        workout.exercises?.forEach(exercise => {
-          const key = exercise.id
-          if (!exerciseMap.has(key)) {
-            exerciseMap.set(key, {
-              name: exercise.name,
-              workouts: new Set(),
-              sets: 0,
-              totalReps: 0,
-              totalWeight: 0,
-              weights: [],
-              lastPerformed: workout.created_at,
-              firstPerformed: workout.created_at
-            })
-          }
+      workoutLogs?.forEach(log => {
+        const exercise = (log as any).exercises
+        const workout = (log as any).workouts
+        const key = exercise.id
+        
+        if (!exerciseMap.has(key)) {
+          exerciseMap.set(key, {
+            name: exercise.name,
+            workouts: new Set(),
+            sets: 0,
+            totalReps: 0,
+            totalWeight: 0,
+            weights: [],
+            lastPerformed: workout.created_at,
+            firstPerformed: workout.created_at
+          })
+        }
 
-          const exerciseStats = exerciseMap.get(key)!
-          exerciseStats.workouts.add(workout.id)
-          exerciseStats.sets += exercise.sets || 0
-          exerciseStats.totalReps += exercise.reps || 0
-          exerciseStats.totalWeight += exercise.weight || 0
-          
-          if (exercise.weight) {
-            exerciseStats.weights.push(exercise.weight)
-          }
+        const exerciseStats = exerciseMap.get(key)!
+        exerciseStats.workouts.add(workout.id)
+        exerciseStats.sets += log.sets || 0
+        exerciseStats.totalReps += log.reps || 0
+        exerciseStats.totalWeight += log.weight_kg || 0
+        
+        if (log.weight_kg) {
+          exerciseStats.weights.push(log.weight_kg)
+        }
 
-          // Update dates
-          if (new Date(workout.created_at) > new Date(exerciseStats.lastPerformed)) {
-            exerciseStats.lastPerformed = workout.created_at
-          }
-          if (new Date(workout.created_at) < new Date(exerciseStats.firstPerformed)) {
-            exerciseStats.firstPerformed = workout.created_at
-          }
-        })
+        // Update dates
+        if (new Date(workout.created_at) > new Date(exerciseStats.lastPerformed)) {
+          exerciseStats.lastPerformed = workout.created_at
+        }
+        if (new Date(workout.created_at) < new Date(exerciseStats.firstPerformed)) {
+          exerciseStats.firstPerformed = workout.created_at
+        }
       })
 
       // Convert to stats format
