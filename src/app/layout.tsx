@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AccountProvider } from "@/contexts/AccountContext";
 import { ThemeProvider } from "@/components/theme-provider";
-import MobileNavigation from "@/components/MobileNavigation";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,10 +62,9 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AccountProvider>
             <div className="relative min-h-screen bg-background">
-              <MobileNavigation />
-              <main className="pb-mobile-nav md:pb-0 pt-0 md:pt-16">
+              <ConditionalLayout>
                 {children}
-              </main>
+              </ConditionalLayout>
             </div>
           </AccountProvider>
         </ThemeProvider>

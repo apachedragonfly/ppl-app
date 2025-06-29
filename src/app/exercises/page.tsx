@@ -63,6 +63,12 @@ export default function ExercisesPage() {
   const loadExercises = async () => {
     try {
       setLoading(true)
+      
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        throw new Error('Supabase is not configured. Please set up your environment variables.')
+      }
+      
       const { data: { user } } = await supabase.auth.getUser()
       
       // Store user ID for other components
@@ -415,46 +421,104 @@ export default function ExercisesPage() {
     )
   }
 
+  // Show setup instructions if there's a configuration error
+  if (error && error.includes('Supabase is not configured')) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-12">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-400 mb-4">
+                🔧 Database Setup Required
+              </h2>
+              <p className="text-yellow-700 dark:text-yellow-500 mb-6">
+                Your Supabase database isn't configured yet. To get started:
+              </p>
+              
+              <div className="text-left max-w-2xl mx-auto space-y-4">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-md border">
+                  <h3 className="font-medium mb-2">1. Create a Supabase Project</h3>
+                  <p className="text-sm text-muted-foreground">Visit <a href="https://supabase.com" className="text-blue-600 hover:underline">supabase.com</a> and create a new project</p>
+                </div>
+                
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-md border">
+                  <h3 className="font-medium mb-2">2. Create Environment File</h3>
+                  <p className="text-sm text-muted-foreground mb-2">Create a <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">.env.local</code> file in your project root with:</p>
+                  <pre className="bg-gray-100 dark:bg-gray-700 p-3 rounded text-xs overflow-x-auto">
+{`NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key`}
+                  </pre>
+                </div>
+                
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-md border">
+                  <h3 className="font-medium mb-2">3. Run Database Migrations</h3>
+                  <p className="text-sm text-muted-foreground">Execute the SQL files in your project to set up the database schema</p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
+              >
+                🔄 Reload Page After Setup
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Exercise Management</h1>
-          <div className="flex space-x-3">
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              ← Dashboard
-            </button>
-            <button
-              onClick={() => setShowStats(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              📊 Statistics
-            </button>
-            <button
-              onClick={() => setShowBulkImport(true)}
-              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              Bulk Import
-            </button>
-            <button
-              onClick={toggleComparisonMode}
-              className={`font-medium py-2 px-4 rounded-md transition-colors ${
-                comparisonMode 
-                  ? 'bg-orange-600 hover:bg-orange-700 text-white' 
-                  : 'bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 dark:hover:bg-orange-900/30'
-              }`}
-            >
-              {comparisonMode ? 'Exit Compare' : '📊 Compare'}
-            </button>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
-            >
-              + Create Exercise
-            </button>
+    <div className="min-h-screen bg-background p-3 sm:p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Exercise Management</h1>
+          
+          {/* Mobile: Stack buttons vertically, Desktop: Horizontal */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            {/* Primary Actions Row */}
+            <div className="flex gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors text-sm sm:text-base"
+              >
+                + Create
+              </button>
+              <button
+                onClick={toggleComparisonMode}
+                className={`flex-1 sm:flex-none font-medium py-2 px-3 sm:px-4 rounded-md transition-colors text-sm sm:text-base ${
+                  comparisonMode 
+                    ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                    : 'bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 dark:hover:bg-orange-900/30'
+                }`}
+              >
+                {comparisonMode ? 'Exit Compare' : 'Compare'}
+              </button>
+            </div>
+            
+            {/* Secondary Actions Row */}
+            <div className="flex gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowStats(true)}
+                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 sm:px-4 rounded-md transition-colors text-sm sm:text-base"
+              >
+                📊 Stats
+              </button>
+              <button
+                onClick={() => setShowBulkImport(true)}
+                className="flex-1 sm:flex-none bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-3 sm:px-4 rounded-md transition-colors text-sm sm:text-base"
+              >
+                Import
+              </button>
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="flex-1 sm:flex-none bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-3 sm:px-4 rounded-md transition-colors text-sm sm:text-base"
+              >
+                ← Back
+              </button>
+            </div>
           </div>
         </div>
 
@@ -517,7 +581,7 @@ export default function ExercisesPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
               {/* Sort By */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
@@ -859,7 +923,7 @@ export default function ExercisesPage() {
         )}
 
         {/* Exercise List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {getFilteredAndSortedExercises().map(exercise => {
             const isSelected = selectedExercisesForComparison.some(e => e.id === exercise.id)
             return (
@@ -867,24 +931,31 @@ export default function ExercisesPage() {
                 key={exercise.id} 
                 className={`bg-card border rounded-lg p-4 shadow-sm hover:shadow-md transition-all ${
                   comparisonMode 
-                    ? (isSelected ? 'border-orange-500 ring-2 ring-orange-200 dark:ring-orange-800' : 'border-border cursor-pointer hover:border-orange-300')
+                    ? (isSelected ? 'border-orange-500 ring-2 ring-orange-200 dark:ring-orange-800 cursor-pointer' : 'border-border cursor-pointer hover:border-orange-300')
                     : 'border-border'
                 }`}
                 onClick={comparisonMode ? () => toggleExerciseSelection(exercise) : undefined}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
+                {/* Exercise Header */}
+                <div className="mb-3">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center space-x-2 flex-1 min-w-0">
                       {comparisonMode && (
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleExerciseSelection(exercise)}
-                          className="rounded border-border text-orange-600 focus:ring-orange-500"
+                          className="rounded border-border text-orange-600 focus:ring-orange-500 w-4 h-4"
                           onClick={(e) => e.stopPropagation()}
                         />
                       )}
-                      <h3 className="font-semibold text-foreground">{exercise.name}</h3>
+                      <h3 className="font-semibold text-foreground truncate">{exercise.name}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground ml-2 shrink-0">{exercise.muscle_group}</p>
+                  </div>
+                  
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-1 mb-2">
                     {exercise.video?.url && (
                       <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
                         📹 Video
@@ -901,66 +972,67 @@ export default function ExercisesPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-1">{exercise.muscle_group}</p>
+                  
+                  {/* Description */}
                   {exercise.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                       {exercise.description}
                     </p>
                   )}
                 </div>
+
+                {/* Action Buttons */}
                 {!comparisonMode && (
-                  <div className="flex space-x-2 ml-3">
-                    <button
-                      onClick={() => handleToggleFavorite(exercise)}
-                      className={`text-sm font-medium transition-colors ${
-                        exercise.is_favorite
-                          ? 'text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300'
-                          : 'text-gray-400 hover:text-yellow-600 dark:text-gray-500 dark:hover:text-yellow-400'
-                      }`}
-                      title={exercise.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
-                    >
-                      {exercise.is_favorite ? '⭐' : '☆'}
-                    </button>
-                    <button
-                      onClick={() => handleShowHistory(exercise)}
-                      className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 text-sm"
-                      title="View exercise history"
-                    >
-                      📊
-                    </button>
-                    <button
-                      onClick={() => handleShowNotes(exercise)}
-                      className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
-                      title="Notes & Personal Records"
-                    >
-                      📝
-                    </button>
-                    <button
-                      onClick={() => handleEditExercise(exercise)}
-                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteExercise(exercise)}
-                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm"
-                    >
-                      Delete
-                    </button>
+                  <div className="space-y-2">
+                    {/* Primary Actions Row */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleToggleFavorite(exercise)}
+                        className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                          exercise.is_favorite
+                            ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/30'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        }`}
+                        title={exercise.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {exercise.is_favorite ? '⭐ Favorite' : '☆ Favorite'}
+                      </button>
+                      <button
+                        onClick={() => handleShowHistory(exercise)}
+                        className="flex-1 py-2 px-3 bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-md text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-900/30 transition-colors"
+                        title="View exercise history"
+                      >
+                        📊 History
+                      </button>
+                    </div>
+                    
+                    {/* Secondary Actions Row */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleShowNotes(exercise)}
+                        className="flex-1 py-2 px-3 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-md text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/30 transition-colors"
+                        title="Notes & Personal Records"
+                      >
+                        📝 Notes
+                      </button>
+                      <button
+                        onClick={() => handleEditExercise(exercise)}
+                        className="flex-1 py-2 px-3 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-md text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteExercise(exercise)}
+                        className="flex-1 py-2 px-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-
-              {/* Exercise Info Card */}
-              <ExerciseInfoCard
-                exerciseName={exercise.name}
-                video={exercise.video}
-                description={exercise.description}
-                musclesWorked={exercise.musclesWorked}
-              />
-            </div>
-          )
-        })}
+            )
+          })}
         </div>
 
         {getFilteredAndSortedExercises().length === 0 && !loading && (
