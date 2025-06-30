@@ -8,6 +8,7 @@ import { getTodayForDB } from '@/lib/utils'
 import ExerciseInfoCard from '@/components/ExerciseInfoCard'
 import ExerciseSearch from '@/components/ExerciseSearch'
 import { TouchNumberInput, QuickSelect, SwipeAction } from '@/components/TouchFriendlyInput'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import RestTimer from '@/components/RestTimer'
 
 
@@ -765,13 +766,26 @@ export default function WorkoutForm({ onWorkoutSaved, templateData }: WorkoutFor
 
                                 {/* Advanced Metrics - RPE and RIR */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                                  <QuickSelect
-                                    label="RPE (1-10) - How hard?"
-                                    options={[6, 7, 8, 9, 10]}
-                                    value={log.rpe || 0}
-                                    onChange={(value) => updateExerciseLog(log.tempId, 'rpe', value)}
-                                    className="w-full"
-                                  />
+                                  <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-foreground">
+                                      RPE (1-10) - How hard?
+                                    </label>
+                                    <Select
+                                      value={log.rpe?.toString() || ""}
+                                      onValueChange={(value) => updateExerciseLog(log.tempId, 'rpe', parseInt(value))}
+                                    >
+                                      <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select RPE" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rpe) => (
+                                          <SelectItem key={rpe} value={rpe.toString()}>
+                                            {rpe} - {rpe <= 3 ? 'Very Easy' : rpe <= 5 ? 'Easy' : rpe <= 7 ? 'Moderate' : rpe <= 8 ? 'Hard' : rpe <= 9 ? 'Very Hard' : 'Maximum'}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
                                   <QuickSelect
                                     label="RIR (0-5) - Reps left?"
                                     options={[0, 1, 2, 3, 4, 5]}

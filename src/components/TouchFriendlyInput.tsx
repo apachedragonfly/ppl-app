@@ -122,13 +122,13 @@ export function QuickSelect({
         </label>
       )}
       
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1">
         {options.map((option) => (
           <button
             key={option}
             type="button"
             onClick={() => onChange(option)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-2 py-1 rounded text-sm font-medium transition-colors min-w-[32px] ${
               value === option
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
